@@ -1,8 +1,12 @@
-use Moose::Util::TypeConstraints;
+#!/usr/bin/env perl
+
+use strict;
+use warnings;
 
 use Cfn;
-
 use Test::More;
+
+use Moose::Util::TypeConstraints;
 
 coerce 'Cfn::Resource::Properties::Test1',
   from 'HashRef',

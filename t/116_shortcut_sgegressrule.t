@@ -1,7 +1,8 @@
 #!/usr/bin/env perl
 
+use strict;
+use warnings;
 use Test::More;
-use CCfn;
 use Data::Dumper;
 $Data::Dumper::Indent=1;
 

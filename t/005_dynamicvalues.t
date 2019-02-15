@@ -1,6 +1,9 @@
+#!/usr/bin/env perl
+
+use strict;
+use warnings;
 use Data::Printer;
 use Test::More;
-#use CCfn;
 
 package TestClass {
   use CloudFormation::DSL;

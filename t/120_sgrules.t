@@ -1,8 +1,8 @@
 #!/usr/bin/env perl
 
+use strict;
+use warnings;
 use Test::More;
-use CCfn;
-
 #
 # This test is designed to verify that the SGRule shortcut generates the proper type of
 # destination depending on the second parameter. That could be an IP address (v4 or

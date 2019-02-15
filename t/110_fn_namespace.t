@@ -1,8 +1,7 @@
 #!/usr/bin/env perl
 
-use FindBin;
-use lib "$FindBin::RealBin/../lib";
-use lib "$FindBin::RealBin/../local/lib/perl5";
+use strict;
+use warnings;
 
 use Test::More;
 use Test::Trap;
