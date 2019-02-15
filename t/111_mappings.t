@@ -1,12 +1,12 @@
+#!/usr/bin/env perl
+
+use strict;
+use warnings;
 use Data::Printer;
 use Test::More;
 
-use Cfn;
-
 package TestClass {
-  use Moose;
-  extends 'CCfn';
-  use CCfnX::Shortcuts;
+  use CloudFormation::DSL;
   use CCfnX::InstanceArgs;
 
   has params => (is => 'ro', isa => 'CCfnX::InstanceArgs', default => sub { CCfnX::InstanceArgs->new(
@@ -37,9 +37,7 @@ cmp_ok($struct->{Mappings}{Map2}{key2}, 'eq', 'value2', 'Got a value for a key o
 
 eval {
   package TestClass2 {
-    use Moose;
-    extends 'CCfn';
-    use CCfnX::Shortcuts;
+    use CloudFormation::DSL;
     use CCfnX::InstanceArgs;
   
     has params => (is => 'ro', isa => 'CCfnX::InstanceArgs', default => sub { CCfnX::InstanceArgs->new(
@@ -63,9 +61,7 @@ like($@, qr/Redeclared/, 'Stack with a duplicate mapping throws');
 
 eval {
   package TestClass3 {
-    use Moose;
-    extends 'CCfn';
-    use CCfnX::Shortcuts;
+    use CloudFormation::DSL;
     use CCfnX::InstanceArgs;
   
     has params => (is => 'ro', isa => 'CCfnX::InstanceArgs', default => sub { CCfnX::InstanceArgs->new(
