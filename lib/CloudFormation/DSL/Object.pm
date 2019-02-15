@@ -5,11 +5,26 @@ package CloudFormation::DSL::Object {
   use Moose;
   extends 'Cfn';
 
+  has stash => (
+    is => 'ro',
+    isa => 'HashRef',
+    default => sub { {} },
+  );
+
+  # Holds the mappings from logical output name, to the output name that will be sent and retrieved from cloudformation
+  # This is done to support characters in the output names that cloudformation doesn't
   has output_mappings => (
     is      => 'rw',
     isa     => 'HashRef[Str]',
     default => sub { {} },
   );
+
+  # Helper to safely add things to stash
+  sub add_to_stash {
+    my ($self, $name, $value) = @_;
+    die "An element is already in the stash with name $name" if (exists $self->stash->{$name});
+    $self->stash->{ $name } = $value;
+  }
 
   # Small helper to map a Moose class (parameters have a type) to a CloudFormation type
   sub _moose_to_cfn_class {
@@ -54,6 +69,12 @@ package CloudFormation::DSL::Object {
         $self->addParameter($param->name, _moose_to_cfn_class($type));
       }
     }
+
+  }
+
+  sub get_stackversion_from_metadata {
+    my $self = shift;
+    $self->Metadata('StackVersion');
   }
 
   before as_hashref => sub {
@@ -75,6 +96,18 @@ package CloudFormation::DSL::Object {
     }
     $self->$orig($new_name, $output, @rest);
   };
+
+  use Sort::Topological qw//;
+
+  sub creation_order {
+    my ($self) = @_;
+
+    my @result = Sort::Topological::toposort(sub {
+      @{ $self->Resource($_[0])->dependencies }
+    }, [ $self->ResourceList ]);
+
+    return reverse @result;
+  }
 
   sub build {}
 }

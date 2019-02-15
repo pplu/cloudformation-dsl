@@ -4,6 +4,7 @@ use strict;
 use warnings;
 use Data::Printer;
 use Test::More;
+use Test::Exception;
 
 package TestClass {
   use CloudFormation::DSL;
@@ -29,6 +30,14 @@ package TestClass {
     },
     Listeners => [
     ],
+  };
+
+  resource IAM => 'AWS::IAM::User', {
+    Path => Cfn::DynamicValue->new(Value => sub {
+      my $self = shift;
+      $self->add_to_stash('akey', 'akeyValue');
+      return '/';
+    })
   };
 
   resource Instance => 'AWS::EC2::Instance', sub {
@@ -70,5 +79,40 @@ cmp_ok($struct->{Resources}{Instance}{Properties}{UserData}{'Fn::Base64'}{'Fn::J
 cmp_ok($struct->{Resources}{Instance}{Properties}{UserData}{'Fn::Base64'}{'Fn::Join'}[1][3], 'eq', 'before dynamic', 'multiple dynamic returns');
 cmp_ok($struct->{Resources}{Instance}{Properties}{UserData}{'Fn::Base64'}{'Fn::Join'}[1][4], 'eq', 'in middle', 'multiple dynamic returns');
 cmp_ok($struct->{Resources}{Instance}{Properties}{UserData}{'Fn::Base64'}{'Fn::Join'}[1][5], 'eq', 'after dynamic', 'multiple dynamic returns');
+cmp_ok($struct->{Resources}{IAM}{Properties}{Path}, 'eq', '/', 'dynamic value that stashes');
+cmp_ok($obj->stash->{ akey }, 'eq', 'akeyValue', 'The stashed value is in the stash');
+
+package TestClass2 {
+  use CloudFormation::DSL;
+  use CCfnX::InstanceArgs;
+
+  has params => (is => 'ro', isa => 'CCfnX::InstanceArgs', default => sub { CCfnX::InstanceArgs->new(
+    instance_type => 'x1.xlarge',
+    region => 'eu-west-1',
+    account => 'devel-capside',
+    name => 'NAME'
+  ); } );
+
+  resource IAM => 'AWS::IAM::User', {
+    Path => Cfn::DynamicValue->new(Value => sub {
+      my $self = shift;
+      $self->add_to_stash('akey', 'akeyValue');
+      return '/';
+    })
+  };
+
+  resource IAM2 => 'AWS::IAM::User', {
+    Path => Cfn::DynamicValue->new(Value => sub {
+      my $self = shift;
+      $self->add_to_stash('akey', 'akeyValue');
+      return '/';
+    })
+  };
+}
+
+{
+  my $o = TestClass2->new;
+  throws_ok(sub { $o->as_hashref }, qr/already in the stash/);
+}
 
 done_testing;
