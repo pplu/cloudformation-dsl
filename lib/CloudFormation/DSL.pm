@@ -11,7 +11,7 @@ package CloudFormation::DSL {
 
   Moose::Exporter->setup_import_methods(
     with_meta => [qw/resource output mapping transform/],
-    as_is     => [qw/Ref Parameter CfString/],
+    as_is     => [qw/Ref GetAtt Parameter CfString/],
     also      => 'Moose',
   );
 
@@ -189,6 +189,12 @@ package CloudFormation::DSL {
     my $ref = shift;
     die "Ref expected a logical name to reference to" if (not defined $ref);
     return { Ref => $ref };
+  }
+
+  sub GetAtt {
+    my ($ref, $property) = @_;
+    die "GetAtt expected a logical name and a property name" if (not defined $ref or not defined $property);
+    { 'Fn::GetAtt' => [ $ref, $property ] }
   }
 
   sub CfString {

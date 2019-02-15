@@ -5,6 +5,12 @@ package CloudFormation::DSL::Object {
   use Moose;
   extends 'Cfn';
 
+  has output_mappings => (
+    is      => 'rw',
+    isa     => 'HashRef[Str]',
+    default => sub { {} },
+  );
+
   # Small helper to map a Moose class (parameters have a type) to a CloudFormation type
   sub _moose_to_cfn_class {
     return {  
@@ -55,6 +61,19 @@ package CloudFormation::DSL::Object {
     # This triggers any actions that the class
     # wants to do while building the cloudformation
     $self->build();
+  };
+
+  around addOutput => sub { 
+    my ($orig, $self, $name, $output, @rest) = @_;
+    my $new_name = $name;
+    $new_name =~ s/\W//g;
+    if (defined $self->Output($new_name)) {
+      die "The output name clashed with an existing output name. Be aware that outputs are stripped of all non-alphanumeric chars before being declared";
+    }
+    if ($new_name ne $name) {
+      $self->output_mappings->{ $new_name } = $name;
+    }
+    $self->$orig($new_name, $output, @rest);
   };
 
   sub build {}

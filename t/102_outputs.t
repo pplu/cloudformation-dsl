@@ -1,16 +1,13 @@
 #!/usr/bin/env perl
 
+use strict;
+use warnings;
 use Test::More;
 use Data::Printer;
 
-use Cfn;
-use CCfnX::Shortcuts;
-
 package TestClass {
-  use Moose;
-  extends 'CCfn';
+  use CloudFormation::DSL;
   use CCfnX::CommonArgs;
-  use CCfnX::Shortcuts;
   use CCfnX::InstanceArgs;
 
   has params => (is => 'ro', isa => 'CCfnX::CommonArgs', default => sub { CCfnX::InstanceArgs->new(
@@ -31,11 +28,8 @@ package TestClass {
 }
 
 package TestClassAddOutput {
-  use Moose;
-  extends 'CCfn';
+  use CloudFormation::DSL;
   use CCfnX::CommonArgs;
-  use CCfnX::Shortcuts;
-  use CCfnX::InstanceArgs;
 
   has params => (is => 'ro', default => sub { CCfnX::CommonArgs->new(account => 'X', name => 'N', region => 'X') });
 
@@ -76,6 +70,7 @@ is_deeply($struct->{Outputs}->{outputwithcond2}->{Condition}, 'thecond2' , "Got 
 is_deeply($struct->{Outputs}->{outputwithcondandexport}->{Condition}, 'thecond' , "Got the correct condition for the output when using a condition and an export in the output");
 is_deeply($struct->{Outputs}->{outputwithcondandexport}->{Export}->{Name}, 'myexportname' , "Got the correct export for the output when using a condition and an export in the output");
 
+use CloudFormation::DSL qw/Ref GetAtt/;
 
 my $obj_manual_output1 = TestClassAddOutput->new;
 $obj_manual_output1->addOutput( myoutput1 => Ref('XXX') );
