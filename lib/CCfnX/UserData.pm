@@ -19,17 +19,16 @@ package CCfnX::UserData {
     return @elements;
   }
 
-  use CCfnX::Shortcuts;
   sub _process_tiefighter {
     my ($tfighter) = @_;
     if ($tfighter =~ m/^([A-Za-z0-9:-]+?)\-\>([A-Za-z0-9.:-]+?)$/) {
       return { 'Fn::GetAtt' => [ "$1", "$2" ] };
     } elsif ($tfighter =~ m/^Parameter\(['"]{0,1}([A-Za-z0-9:_-]+?)['"]{0,1}\)$/) {
       my $param = "$1";
-      return CCfnX::Shortcuts::Parameter($param);
+      return CloudFormation::DSL::Parameter($param);
     } elsif ($tfighter =~ m/^Attribute\(([A-Za-z0-9.:_-]+?)\)$/) {
       my $path = "$1";
-      return CCfnX::Shortcuts::Attribute($path);
+      return CloudFormation::DSL::Attribute($path);
     } elsif ($tfighter =~ m/^([A-Za-z0-9:-]+)$/) {
       return { Ref => "$1" }
     } else {

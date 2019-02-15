@@ -5,12 +5,13 @@ package CloudFormation::DSL {
   use Moose::Exporter;
   use Moose::Util::MetaRole ();
 
+  use CCfnX::UserData;
   use CCfnX::DSL::Inheritance;
   use CloudFormation::DSL::Object;
 
   Moose::Exporter->setup_import_methods(
     with_meta => [qw/resource output mapping transform/],
-    as_is     => [qw/Ref Parameter/],
+    as_is     => [qw/Ref Parameter CfString/],
     also      => 'Moose',
   );
 
@@ -188,6 +189,14 @@ package CloudFormation::DSL {
     my $ref = shift;
     die "Ref expected a logical name to reference to" if (not defined $ref);
     return { Ref => $ref };
+  }
+
+  sub CfString {
+    my $string = shift;
+    return Cfn::DynamicValue->new(Value => sub {
+      my @ctx = @_;
+      CCfnX::UserData->new(text => $string)->as_hashref_joins(@ctx);
+    });
   }
 
 }
