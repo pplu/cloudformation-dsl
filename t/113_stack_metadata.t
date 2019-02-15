@@ -3,10 +3,8 @@
 use Test::More;
 
 package TestClass {
-  use Moose;
-  extends 'CCfn';
+  use CloudFormation::DSL;
   use CCfnX::CommonArgs;
-  use CCfnX::Shortcuts;
   use CCfnX::InstanceArgs;
 
   has params => (is => 'ro', isa => 'CCfnX::CommonArgs', default => sub { CCfnX::InstanceArgs->new(

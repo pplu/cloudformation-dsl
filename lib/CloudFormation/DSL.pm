@@ -11,7 +11,7 @@ package CloudFormation::DSL {
   use CloudFormation::DSL::Object;
 
   Moose::Exporter->setup_import_methods(
-    with_meta => [qw/resource output mapping transform/],
+    with_meta => [qw/resource output mapping metadata transform/],
     as_is     => [qw/Ref GetAtt Parameter CfString UserData Attribute/],
     also      => 'Moose',
   );
@@ -154,6 +154,38 @@ package CloudFormation::DSL {
         return Moose::Util::TypeConstraints::find_type_constraint('Cfn::Mapping')->coerce({ %args });
       },
     );
+  }
+
+  sub metadata {
+    Moose->throw_error('Usage: metadata \'name\' => {json-object}')
+        if (@_ != 3);
+    my ( $meta, $name, @options ) = @_;
+
+    if (my ($att) = ($name =~ m/^\+(.*)/)) {
+      $meta->add_attribute(
+        $att,
+        is => 'rw',
+        isa => 'Cfn::Value',
+        coerce => 1,
+        traits => [ 'Metadata' ],
+        lazy => 1,
+        default => sub {
+          return Moose::Util::TypeConstraints::find_type_constraint('Cfn::Value')->coerce(@options);
+        },
+      );
+    } else {
+      $meta->add_attribute(
+        $name,
+        is => 'rw',
+        isa => 'Cfn::Value',
+        coerce => 1,
+        traits => [ 'Metadata' ],
+        lazy => 1,
+        default => sub {
+          return Moose::Util::TypeConstraints::find_type_constraint('Cfn::Value')->coerce(@options);
+        },
+      );
+    }
   }
 
   sub Parameter {
