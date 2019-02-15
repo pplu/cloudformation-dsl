@@ -1,7 +1,5 @@
 #/usr/bin/env perl
 
-use CCfn;
-
 use Data::Dumper;
 use Test::More;
 
@@ -27,9 +25,7 @@ package Cfn::Resource::Type1 {
 }
 
 package Test1 {
-  use Moose;
-  extends 'CCfn';
-  use CCfnX::Shortcuts;
+  use CloudFormation::DSL;
   use CCfnX::CommonArgs;
 
   has params => (is => 'ro', default => sub { CCfnX::CommonArgs->new(
