@@ -13,7 +13,7 @@ package CloudFormation::DSL {
 
   Moose::Exporter->setup_import_methods(
     with_meta => [qw/resource output mapping metadata transform/],
-    as_is     => [qw/Ref GetAtt Parameter CfString UserData Attribute SGEgressRule/],
+    as_is     => [qw/Ref GetAtt Parameter CfString UserData Attribute SGEgressRule SGRule/],
     also      => 'Moose',
   );
 
@@ -241,6 +241,66 @@ package CloudFormation::DSL {
     my ($ref, $property) = @_;
     die "GetAtt expected a logical name and a property name" if (not defined $ref or not defined $property);
     { 'Fn::GetAtt' => [ $ref, $property ] }
+  }
+
+  # Creates a rule for a security group:
+  # IF port is a number, it opens just that port
+  # IF port is a range: number-number, it opens that port range
+  # to: where to open the rule to. If this looks like a CIDR, it will populate CidrIP in the rule,
+  #     else, it will populate SourceSecurityGroupId. (This means that you can't use this shortcut
+  #     to open a SG to a Ref(...) in a parameter, for example).
+  # proto: if specified, uses that protocol. If not, TCP by default
+  sub SGRule {
+    my ($port, $to, $proto_or_desc, $desc) = @_;
+    my $proto;
+
+    if (defined($proto_or_desc)) {
+        if ($proto_or_desc eq 'tcp'
+                or $proto_or_desc eq 'udp'
+                or $proto_or_desc eq 'icmp'
+                or looks_like_number($proto_or_desc)) {
+            $proto = $proto_or_desc;
+        } else {
+            $proto = 'tcp';
+            $desc  = $proto_or_desc;
+        }
+    }
+
+    my ($from_port, $to_port);
+    if ($port =~ m/\-/) {
+      if ($port eq '-1') {
+        ($from_port, $to_port) = (-1, -1);
+      } else {
+        ($from_port, $to_port) = split /\-/, $port, 2;
+      }
+    } else {
+      ($from_port, $to_port) = ($port, $port);
+    }
+
+    $proto = 'tcp' if (not defined $proto);
+    my $rule = { IpProtocol => $proto, FromPort => $from_port, ToPort => $to_port};
+    $rule->{ Description } = $desc if (defined $desc);
+
+    my $key;
+    # Rules to detect when we're trying to open to a CIDR
+
+    # If $to is a reference, it means that it is either:
+    #   - A CloudDeploy Ref of another resource
+    #   - A CCfnX::DynamicValue object (usually coming from a Parameter())
+    # In both cases, it ends up pointing to a SG identifier.
+    # If $to is an IP address, it will come in form of a string (scalar)
+    # hence falling back to a SSGroupId
+    unless (ref($to)) {
+        $key = 'CidrIp' if ($to =~ m/$RE{net}{IPv4}/);
+        $key = 'CidrIpv6' if ($to =~ m/$RE{net}{IPv6}/);
+    }
+
+    # Fallback to SSGroupId
+    $key = 'SourceSecurityGroupId' if (not defined $key);
+
+    $rule->{ $key } = $to;
+
+    return $rule;
   }
 
   sub SGEgressRule {

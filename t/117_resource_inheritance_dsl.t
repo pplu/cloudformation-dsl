@@ -1,7 +1,7 @@
 #!/usr/bin/env perl
 
-use CCfn;
-
+use strict;
+use warnings;
 use Test::More;
 use Test::Exception;
 use Data::Dumper;
@@ -19,9 +19,7 @@ package SuperClassParams {
 }
 
 package SuperClass {
-  use Moose;
-  extends 'CCfn';
-  use CCfnX::Shortcuts;
+  use CloudFormation::DSL;
 
   has params => (is => 'ro', isa => 'SuperClassParams', default => sub { SuperClassParams->new() });
 
@@ -36,9 +34,7 @@ package SuperClass {
 }
 
 package SuperClassDynamicValue {
-  use Moose;
-  extends 'CCfn';
-  use CCfnX::Shortcuts;
+  use CloudFormation::DSL;
 
   has params => (is => 'ro', isa => 'SuperClassParams', default => sub { SuperClassParams->new() });
 
@@ -58,9 +54,8 @@ package SuperClassDynamicValue {
 
 {
   package ChildClassReplace {
-    use Moose;
+    use CloudFormation::DSL;
     extends 'SuperClass';
-    use CCfnX::Shortcuts;
 
     resource '+SG' => 'AWS::EC2::SecurityGroup', {
       '+VpcId' => 'vpc-xxxx',
@@ -97,9 +92,8 @@ package SuperClassDynamicValue {
 
 {
   package ChildClassDelete {
-    use Moose;
+    use CloudFormation::DSL;
     extends 'SuperClass';
-    use CCfnX::Shortcuts;
 
     resource '+SG' => 'AWS::EC2::SecurityGroup', {
       '-SecurityGroupIngress' => [],
@@ -127,9 +121,8 @@ package SuperClassDynamicValue {
 {
 
   package ChildClassMerge {
-    use Moose;
+    use CloudFormation::DSL;
     extends 'SuperClass';
-    use CCfnX::Shortcuts;
 
     resource '+SG' => 'AWS::EC2::SecurityGroup', {
       '~SecurityGroupIngress' => [
@@ -182,9 +175,8 @@ package SuperClassDynamicValue {
 {
 
 package ChildClassMixed {
-  use Moose;
+  use CloudFormation::DSL;
   extends 'SuperClass';
-  use CCfnX::Shortcuts;
 
   resource '+SG' => 'AWS::EC2::SecurityGroup', {
     '+VpcId' => 'vpc-xxxx',
@@ -219,9 +211,8 @@ package ChildClassMixed {
 
 {
   package ReplaceDynamicValueFromOrigin {
-    use Moose;
+    use CloudFormation::DSL;
     extends 'SuperClassDynamicValue';
-    use CCfnX::Shortcuts;
 
     resource '+SG' => 'AWS::EC2::SecurityGroup', {
       '+SecurityGroupIngress' => [
@@ -257,9 +248,8 @@ package ChildClassMixed {
 
 {
   package ChildClassMergeWithDynamicValue {
-    use Moose;
+    use CloudFormation::DSL;
     extends 'SuperClass';
-    use CCfnX::Shortcuts;
 
     resource '+SG' => 'AWS::EC2::SecurityGroup', {
       '~SecurityGroupIngress' => [
@@ -308,9 +298,8 @@ package ChildClassMixed {
 
 {
   package ChildClassReplaceWithDynamicValue {
-    use Moose;
+    use CloudFormation::DSL;
     extends 'SuperClass';
-    use CCfnX::Shortcuts;
 
     resource '+SG' => 'AWS::EC2::SecurityGroup', {
       '+SecurityGroupIngress' => [
@@ -345,9 +334,8 @@ package ChildClassMixed {
 
 {
   package MergeDynamicValueFromOrigin {
-    use Moose;
+    use CloudFormation::DSL;
     extends 'SuperClassDynamicValue';
-    use CCfnX::Shortcuts;
 
     resource '+SG' => 'AWS::EC2::SecurityGroup', {
       '~SecurityGroupIngress' => [
@@ -395,9 +383,8 @@ package ChildClassMixed {
   }
 
   package MergeDynamicValueFromOrigin2 {
-    use Moose;
+    use CloudFormation::DSL;
     extends 'SuperClassDynamicValue';
-    use CCfnX::Shortcuts;
 
     has '+params' => (isa => 'Params', default => sub { Params->new() });
 
@@ -439,9 +426,7 @@ package ChildClassMixed {
 {
 
   package DeeperMergeSuperClass {
-    use Moose;
-    extends 'CCfn';
-    use CCfnX::Shortcuts;
+    use CloudFormation::DSL;
 
     has params => (is => 'ro', isa => 'SuperClassParams', default => sub { SuperClassParams->new() });
 
@@ -468,9 +453,8 @@ package ChildClassMixed {
   }
 
   package DeeperMergeChildClass {
-    use Moose;
+    use CloudFormation::DSL;
     extends 'DeeperMergeSuperClass';
-    use CCfnX::Shortcuts;
 
     resource '+Role' => 'AWS::IAM::Role', {
       '~Policies' => [{
@@ -526,9 +510,7 @@ package ChildClassMixed {
 
 {
   package SuperClassWithHashProp {
-    use Moose;
-    extends 'CCfn';
-    use CCfnX::Shortcuts;
+    use CloudFormation::DSL;
 
     has params => (is => 'ro', isa => 'SuperClassParams', default => sub { SuperClassParams->new() });
 
@@ -543,9 +525,8 @@ package ChildClassMixed {
   };
 
   package ChildClassMergeHash {
-    use Moose;
+    use CloudFormation::DSL;
     extends 'SuperClassWithHashProp';
-    use CCfnX::Shortcuts;
 
     resource '+ParameterGroup' => 'AWS::RDS::DBParameterGroup', {
       '~Parameters' => {
@@ -570,9 +551,7 @@ package ChildClassMixed {
 
 {
   package SuperClassWithExtra {
-    use Moose;
-    extends 'CCfn';
-    use CCfnX::Shortcuts;
+    use CloudFormation::DSL;
 
     has params => (is => 'ro', isa => 'SuperClassParams', default => sub { SuperClassParams->new() });
 
@@ -602,9 +581,8 @@ package ChildClassMixed {
   };
 
   package ChildClassWithExtra {
-    use Moose;
+    use CloudFormation::DSL;
     extends 'SuperClassWithExtra';
-    use CCfnX::Shortcuts;
 
     has params => (is => 'ro', isa => 'SuperClassParams', default => sub { SuperClassParams->new() });
 
