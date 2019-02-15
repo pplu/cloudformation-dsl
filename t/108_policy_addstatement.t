@@ -3,9 +3,7 @@
 use Test::More;
 
 package PolicyTest {
-  use Moose;
-  extends 'CCfn';
-  use CCfnX::Shortcuts;
+  use CloudFormation::DSL;
   use CCfnX::CommonArgs;
 
   has params => (is => 'ro', isa => 'CCfnX::CommonArgs', default => sub {
