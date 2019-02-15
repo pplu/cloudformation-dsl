@@ -5,13 +5,14 @@ package CloudFormation::DSL {
   use Moose::Exporter;
   use Moose::Util::MetaRole ();
 
+  use Carp;
   use CCfnX::UserData;
   use CCfnX::DSL::Inheritance;
   use CloudFormation::DSL::Object;
 
   Moose::Exporter->setup_import_methods(
     with_meta => [qw/resource output mapping transform/],
-    as_is     => [qw/Ref GetAtt Parameter CfString/],
+    as_is     => [qw/Ref GetAtt Parameter CfString UserData Attribute/],
     also      => 'Moose',
   );
 
@@ -185,6 +186,18 @@ package CloudFormation::DSL {
     });
   }
 
+  sub Attribute {
+    my $path = shift;
+    my ($attribute, $method, $rest) = split /\./, $path;
+    croak "Don't understand attributes with more than two path elements" if (defined $rest);
+    croak "Must specify an attribute read from" if (not defined $attribute);
+    if (not defined $method) {
+      return Cfn::DynamicValue->new(Value => sub { return $_[0]->$attribute });
+    } else {
+      return Cfn::DynamicValue->new(Value => sub { return $_[0]->$attribute->$method });
+    }
+  }
+
   sub Ref {
     my $ref = shift;
     die "Ref expected a logical name to reference to" if (not defined $ref);
@@ -195,6 +208,14 @@ package CloudFormation::DSL {
     my ($ref, $property) = @_;
     die "GetAtt expected a logical name and a property name" if (not defined $ref or not defined $property);
     { 'Fn::GetAtt' => [ $ref, $property ] }
+  }
+
+  sub UserData {
+    my @args = @_;
+    return Cfn::DynamicValue->new(Value => sub {
+      my @ctx = @_;
+      CCfnX::UserData->new(text => $args[0])->as_hashref(@ctx);
+    });
   }
 
   sub CfString {

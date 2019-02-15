@@ -1,7 +1,7 @@
 #!/usr/bin/env perl
 
-use CCfn;
-
+use strict;
+use warnings;
 use Test::More;
 use Test::Exception;
 
@@ -20,9 +20,7 @@ package TestShortcutsInner {
 }
 
 package TestShortcuts {
-  use Moose;
-  extends 'CCfn';
-  use CCfnX::Shortcuts;
+  use CloudFormation::DSL;
 
   has params => (is => 'ro', isa => 'TestShortcutsParams', default => sub { TestShortcutsParams->new });
 
