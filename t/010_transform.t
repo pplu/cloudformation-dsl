@@ -7,11 +7,8 @@ use Test::More;
 {
 
   package GlobalTransform {
-    use Moose;
-    extends 'CCfn';
-    use CCfn;
+    use CloudFormation::DSL;
     use CCfnX::CommonArgs;
-    use CCfnX::Shortcuts;
 
     has params => ( is => 'ro', isa => 'CCfnX::CommonArgs', default => sub { CCfnX::CommonArgs->new( {
             name    => 'GlobalTransform',

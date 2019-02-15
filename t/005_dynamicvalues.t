@@ -2,13 +2,10 @@ use Data::Printer;
 use Test::More;
 #use CCfn;
 
-use Cfn;
-
 package TestClass {
-  use Moose;
-  extends 'CCfn';
-  use CCfnX::Shortcuts;
+  use CloudFormation::DSL;
   use CCfnX::InstanceArgs;
+  use CCfnX::DynamicValue;
   # So we can use Test::More in the dynamic values
   use Test::More;
 

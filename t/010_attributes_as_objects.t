@@ -9,9 +9,7 @@ use Test::More;
 use Cfn;
 
 package TestClass {
-  use Moose;
-  extends 'CCfn';
-  use CCfnX::Shortcuts;
+  use CloudFormation::DSL;
   use CCfnX::InstanceArgs;
 
   has params => (is => 'ro', isa => 'CCfnX::InstanceArgs', default => sub { CCfnX::InstanceArgs->new(

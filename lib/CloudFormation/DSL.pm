@@ -9,7 +9,7 @@ package CloudFormation::DSL {
   use CloudFormation::DSL::Object;
 
   Moose::Exporter->setup_import_methods(
-    with_meta => [qw/resource/],
+    with_meta => [qw/resource mapping transform/],
     as_is     => [qw/Parameter/],
     also      => 'Moose',
   );
@@ -18,6 +18,27 @@ package CloudFormation::DSL {
     shift;
     my %args = @_;
     return Moose->init_meta(%args, base_class => 'CloudFormation::DSL::Object');
+  }
+
+  sub transform {
+    Moose->throw_error('Usage: transform name1, name2, ... , nameN;')
+        if ( @_ < 1 );
+    my ( $meta, @transforms ) = @_;
+
+    if ( $meta->find_attribute_by_name('transform') ) {
+      die "There is already a transform element in the template";
+    }
+
+    # Allow just one of this to be declared
+    $meta->add_attribute(
+      'transform_spec',
+      is      => 'rw',
+      isa     => 'ArrayRef[Str]',
+      traits  => ['Transform'],
+      lazy    => 1,
+      default => sub { \@transforms },
+    );
+
   }
 
   sub resource {
@@ -58,6 +79,34 @@ package CloudFormation::DSL {
       traits => [ 'Resource' ],
       lazy => 1,
       default => $default_coderef,
+    );
+  }
+
+  sub mapping {
+    Moose->throw_error('Usage: mapping \'name\' => { key => value, ... }')
+        if (@_ != 3);
+    my ( $meta, $name, $options ) = @_;
+
+    if ($meta->find_attribute_by_name($name)){
+      die "Redeclared resource/output/condition/mapping $name";
+    }
+
+    my %args = ();
+    if (ref($options) eq 'CODE'){
+      %args = &$options();
+    } elsif (ref($options) eq 'HASH'){
+      %args = %$options;
+    }
+
+    $meta->add_attribute(
+      $name,
+      is => 'rw',
+      isa => 'Cfn::Mapping',
+      traits => [ 'Mapping' ],
+      lazy => 1,
+      default => sub {
+        return Moose::Util::TypeConstraints::find_type_constraint('Cfn::Mapping')->coerce({ %args });
+      },
     );
   }
 
