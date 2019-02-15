@@ -90,7 +90,7 @@ package TestClass3 {
 
 $obj = TestClass3->new;
 cmp_ok($obj->Resource('User')->Properties->Path->as_hashref, 'eq', '/', 'Path is accessible');
-my $hashref = $obj->as_hashref;
+$hashref = $obj->as_hashref;
 is_deeply(
   $hashref->{Resources}->{User}->{UpdatePolicy},
   {'AutoScalingRollingUpdate' => {
