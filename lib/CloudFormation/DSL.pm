@@ -5,6 +5,9 @@ package CloudFormation::DSL {
   use Moose::Exporter;
   use Moose::Util::MetaRole ();
 
+  our $VERSION = '0.01';
+  # ABSTRACT: A DSL for building CloudFormation templates
+
   use Carp;
   use CCfnX::UserData;
   use CCfnX::DSL::Inheritance;
