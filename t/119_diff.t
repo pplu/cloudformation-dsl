@@ -1,15 +1,13 @@
 #/usr/bin/env perl
 
+use strict;
+use warnings;
 use Test::More;
 
-use Cfn;
 use Cfn::Diff;
 
 package Test401::Stack1 {
-  use CCfn;
-  use CCfnX::Shortcuts;
-  use Moose;
-  extends 'CCfn';
+  use CloudFormation::DSL;
 
   use CCfnX::CommonArgs;
   has params => (is => 'ro', default => sub { CCfnX::CommonArgs->new(account => 'X', name => 'N', region => 'X') });
@@ -20,10 +18,7 @@ package Test401::Stack1 {
 }
 
 package Test401::Stack1ChangeR1 {
-  use CCfn;
-  use CCfnX::Shortcuts;
-  use Moose;
-  extends 'CCfn';
+  use CloudFormation::DSL;
 
   use CCfnX::CommonArgs;
   has params => (is => 'ro', default => sub { CCfnX::CommonArgs->new(account => 'X', name => 'N', region => 'X') });
@@ -34,10 +29,7 @@ package Test401::Stack1ChangeR1 {
 
 
 package Test401::Stack2 {
-  use CCfn;
-  use CCfnX::Shortcuts;
-  use Moose;
-  extends 'CCfn';
+  use CloudFormation::DSL;
 
   use CCfnX::CommonArgs;
   has params => (is => 'ro', default => sub { CCfnX::CommonArgs->new(account => 'X', name => 'N', region => 'X') });
@@ -48,10 +40,7 @@ package Test401::Stack2 {
 }
 
 package Test401::Stack3 {
-  use CCfn;
-  use CCfnX::Shortcuts;
-  use Moose;
-  extends 'CCfn';
+  use CloudFormation::DSL;
 
   use CCfnX::CommonArgs;
   has params => (is => 'ro', default => sub { CCfnX::CommonArgs->new(account => 'X', name => 'N', region => 'X') });
@@ -62,10 +51,7 @@ package Test401::Stack3 {
 }
 
 package Test401::Stack4 {
-  use CCfn;
-  use CCfnX::Shortcuts;
-  use Moose;
-  extends 'CCfn';
+  use CloudFormation::DSL;
 
   use CCfnX::CommonArgs;
   has params => (is => 'ro', default => sub { CCfnX::CommonArgs->new(account => 'X', name => 'N', region => 'X') });
@@ -77,10 +63,7 @@ package Test401::Stack4 {
 }
 
 package Test401::Stack5 {
-  use CCfn;
-  use CCfnX::Shortcuts;
-  use Moose;
-  extends 'CCfn';
+  use CloudFormation::DSL;
 
   use CCfnX::CommonArgs;
   has params => (is => 'ro', default => sub { CCfnX::CommonArgs->new(account => 'X', name => 'N', region => 'X') });
@@ -92,10 +75,7 @@ package Test401::Stack5 {
 }
 
 package Test401::Stack6 {
-  use CCfn;
-  use CCfnX::Shortcuts;
-  use Moose;
-  extends 'CCfn';
+  use CloudFormation::DSL;
 
   use CCfnX::CommonArgs;
   has params => (is => 'ro', default => sub { CCfnX::CommonArgs->new(account => 'X', name => 'N', region => 'X') });
@@ -107,10 +87,7 @@ package Test401::Stack6 {
 }
 
 package Test401::Stack7 {
-  use CCfn;
-  use CCfnX::Shortcuts;
-  use Moose;
-  extends 'CCfn';
+  use CloudFormation::DSL;
 
   use CCfnX::CommonArgs;
   has params => (is => 'ro', default => sub { CCfnX::CommonArgs->new(account => 'X', name => 'N', region => 'X') });
@@ -134,10 +111,7 @@ package Test401::Stack8Params {
 }
 
 package Test401::Stack8 {
-  use CCfn;
-  use CCfnX::Shortcuts;
-  use Moose;
-  extends 'CCfn';
+  use CloudFormation::DSL;
   
   has params => (is => 'ro', default => sub { Test401::Stack8Params->new(account => 'X', name => 'N', region => 'X') });
 
@@ -153,10 +127,7 @@ package Test401::Stack8 {
 }
 
 package Test401::Stack9 {
-  use CCfn;
-  use CCfnX::Shortcuts;
-  use Moose;
-  extends 'CCfn';
+  use CloudFormation::DSL;
 
   use CCfnX::CommonArgs;
   has params => (is => 'ro', default => sub { CCfnX::CommonArgs->new(account => 'X', name => 'N', region => 'X') });
@@ -170,10 +141,7 @@ package Test401::Stack9 {
 }
 
 package Test401::Stack10 {
-  use CCfn;
-  use CCfnX::Shortcuts;
-  use Moose;
-  extends 'CCfn';
+  use CloudFormation::DSL;
 
   use CCfnX::CommonArgs;
   has params => (is => 'ro', default => sub { CCfnX::CommonArgs->new(account => 'X', name => 'N', region => 'X') });
