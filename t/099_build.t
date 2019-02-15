@@ -11,10 +11,7 @@ package TestClassParams {
 }
 
 package TestClass {
-  use Moose;
-  extends 'CCfn';
-  use CCfnX::InstanceArgs;
-  use CCfnX::Shortcuts;
+  use CloudFormation::DSL;
 
   has params => (is => 'ro', isa => 'TestClassParams', default => sub { TestClassParams->new(
     instance_type => 'x1.xlarge',

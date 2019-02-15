@@ -9,8 +9,8 @@ package CloudFormation::DSL {
   use CloudFormation::DSL::Object;
 
   Moose::Exporter->setup_import_methods(
-    with_meta => [qw/resource mapping transform/],
-    as_is     => [qw/Parameter/],
+    with_meta => [qw/resource output mapping transform/],
+    as_is     => [qw/Ref Parameter/],
     also      => 'Moose',
   );
 
@@ -82,6 +82,50 @@ package CloudFormation::DSL {
     );
   }
 
+  sub output {
+    Moose->throw_error('Usage: output \'name\' => Ref|GetAtt|{}[, { Condition => ... }]')
+        if ( @_ lt 3 and @_ gt 5  );
+    my ( $meta, $name, $options, $extra ) = @_;
+
+    if ($meta->find_attribute_by_name($name)){
+      die "Redeclared resource/output/condition/mapping $name";
+    }
+
+    $extra = {} if (not defined $extra);
+
+    if (my ($att) = ($name =~ m/^\+(.*)/)) {
+      $meta->add_attribute(
+        $att,
+        is => 'rw',
+        isa => 'Cfn::Output',
+        coerce => 1,
+        traits => [ 'Output', 'PostOutput' ],
+        lazy => 1,
+        default => sub {
+          return Moose::Util::TypeConstraints::find_type_constraint('Cfn::Output')->coerce({
+            Value => $options,
+            %$extra }
+          );
+        },
+      );
+    } else {
+      $meta->add_attribute(
+        $name,
+        is => 'rw',
+        isa => 'Cfn::Output',
+        coerce => 1,
+        traits => [ 'Output' ],
+        lazy => 1,
+        default => sub {
+          return Moose::Util::TypeConstraints::find_type_constraint('Cfn::Output')->coerce({
+            Value => $options,
+            %$extra }
+          );
+        },
+      );
+    }
+  }
+
   sub mapping {
     Moose->throw_error('Usage: mapping \'name\' => { key => value, ... }')
         if (@_ != 3);
@@ -138,6 +182,12 @@ package CloudFormation::DSL {
       Moose->throw_error("DynamicValue didn't get it's context") if (not defined $cfn);
       return $cfn->params->$param
     });
+  }
+
+  sub Ref {
+    my $ref = shift;
+    die "Ref expected a logical name to reference to" if (not defined $ref);
+    return { Ref => $ref };
   }
 
 }
