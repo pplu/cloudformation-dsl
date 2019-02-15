@@ -10,6 +10,7 @@ package CloudFormation::DSL {
   use CCfnX::DSL::Inheritance;
   use CloudFormation::DSL::Object;
   use Regexp::Common qw(net);
+  use Scalar::Util qw(looks_like_number);
 
   Moose::Exporter->setup_import_methods(
     with_meta => [qw/resource output mapping metadata transform/],

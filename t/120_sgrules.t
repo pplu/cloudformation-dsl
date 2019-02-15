@@ -18,9 +18,7 @@ package Params {
 }
 
 package TestClass {
-    use Moose;
-    extends 'CCfn';
-    use CCfnX::Shortcuts;
+    use CloudFormation::DSL;
 
     has params => (is => 'ro', isa => 'Params',
             default => sub { Params->new( sgname => 'sg-dabacabab') });
@@ -76,7 +74,7 @@ is_deeply($resources->{SGIpv6}{Properties}{SecurityGroupIngress}[0]{CidrIpv6},
         '2001:0db8:85a3:0000:0000:8a2e:0370:7334/128', "A scalar lookling like an IPv6 generates a CidrIpv6");
 
 # SGRule misc tests
-use CCfnX::Shortcuts;
+use CloudFormation::DSL qw/SGRule/;
 use Data::Dumper;
 my $rule;
 
