@@ -7,10 +7,8 @@ $Data::Dumper::Indent=1;
 
 {
   package TestClass {
-    use Moose;
+    use CloudFormation::DSL;
     use CCfnX::CommonArgs;
-    extends 'CCfn';
-    use CCfnX::Shortcuts;
 
     has params => (is => 'ro', isa => 'CCfnX::CommonArgs',
             default => sub { CCfnX::CommonArgs->new( 
