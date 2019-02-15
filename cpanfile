@@ -1,4 +1,5 @@
 requires 'Moose';
+requires 'MooseX::Getopt';
 requires 'Cfn';
 requires 'Sort::Topological';
 requires 'Regexp::Common';
