@@ -1,7 +1,6 @@
 #!/usr/bin/env perl
 
 use Test::More;
-use CCfn;
 
 #
 # This test is designed to verify that the shortcut "resource" assigns extra information (the
@@ -17,9 +16,7 @@ package Params {
 }
 
 package TestClass {
-  use Moose;
-  extends 'CCfn';
-  use CCfnX::Shortcuts;
+  use CloudFormation::DSL;
 
   has params => (is => 'ro', isa => 'Params', default => sub { Params->new_with_options });
 
@@ -39,9 +36,7 @@ cmp_ok($obj->Resource('User')->DeletionPolicy, 'eq', 'Retain', 'DeletionPolicy i
 
 
 package TestClass2 {
-  use Moose;
-  extends 'CCfn';
-  use CCfnX::Shortcuts;
+  use CloudFormation::DSL;
 
   has params => (is => 'ro', isa => 'Params', default => sub { Params->new_with_options });
 
@@ -75,9 +70,7 @@ cmp_ok(
 );
 
 package TestClass3 {
-  use Moose;
-  extends 'CCfn';
-  use CCfnX::Shortcuts;
+  use CloudFormation::DSL;
 
   has params => (is => 'ro', isa => 'Params', default => sub { Params->new_with_options });
 

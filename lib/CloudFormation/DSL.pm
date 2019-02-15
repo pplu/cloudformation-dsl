@@ -178,7 +178,7 @@ package CloudFormation::DSL {
     }
     my $param = shift;
     die "Must specify a parameter to read from" if (not defined $param);
-    return CCfnX::DynamicValue->new(Value => sub {
+    return Cfn::DynamicValue->new(Value => sub {
       my $cfn = shift;
       Moose->throw_error("DynamicValue didn't get it's context") if (not defined $cfn);
       return $cfn->params->$param
