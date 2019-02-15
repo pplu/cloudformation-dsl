@@ -1,7 +1,8 @@
 #!/usr/bin/env perl
 
+use strict;
+use warnings;
 use Test::More;
-use CCfn;
 use Test::Exception;
 
 #
@@ -17,9 +18,7 @@ package Params {
 
 dies_ok {
   package TestClass {
-    use Moose;
-    extends 'CCfn';
-    use CCfnX::Shortcuts;
+    use CloudFormation::DSL;
   
     has params => (is => 'ro', isa => 'Params', default => sub { Params->new_with_options });
   
