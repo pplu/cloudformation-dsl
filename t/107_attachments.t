@@ -1,9 +1,11 @@
 #!/usr/bin/env perl
 
-use CCfn;
-
+use strict;
+use warnings;
 use Test::More;
 use Test::Exception;
+
+use CloudFormation::DSL::Traits;
 
 throws_ok {
   package TestArgs {
@@ -35,9 +37,10 @@ package TestAttach {
   );
 }
 
-my $params = TestAttach->new_with_options(Att => 'Manual Value', name => 'X', region => 'X', account => 'devel-capside');
-
-cmp_ok($params->Att, 'eq', 'Manual Value', 'Can specify an argument from an attachment without specifying the attachment');
+{
+  my $params = TestAttach->new_with_options(Att => 'Manual Value', name => 'X', region => 'X', account => 'devel-capside');
+  cmp_ok($params->Att, 'eq', 'Manual Value', 'Can specify an argument from an attachment without specifying the attachment');
+}
 
 throws_ok {
   package TestArgsWithDefault {
@@ -71,8 +74,9 @@ package TestAttachWithDefault {
   );
 }
 
-my $params = TestAttachWithDefault->new_with_options(name => 'X', region => 'X', account => 'devel-capside');
-
-cmp_ok($params->Attachment, 'eq', 'SomeAttachedStack', 'Can specify a default value for the attachment');
+{
+  my $params = TestAttachWithDefault->new_with_options(name => 'X', region => 'X', account => 'devel-capside');
+  cmp_ok($params->Attachment, 'eq', 'SomeAttachedStack', 'Can specify a default value for the attachment');
+}
 
 done_testing;
