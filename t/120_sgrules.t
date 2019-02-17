@@ -74,7 +74,7 @@ is_deeply($resources->{SGIpv6}{Properties}{SecurityGroupIngress}[0]{CidrIpv6},
         '2001:0db8:85a3:0000:0000:8a2e:0370:7334/128', "A scalar lookling like an IPv6 generates a CidrIpv6");
 
 # SGRule misc tests
-use CloudFormation::DSL qw/SGRule/;
+use CloudFormation::DSL qw/SGRule ELBListener TCPELBListener/;
 use Data::Dumper;
 my $rule;
 
@@ -114,5 +114,50 @@ $desc = 'desc50desc';
 $rule = SGRule(80, '0.0.0.0/0', $desc);
 is($rule->{IpProtocol}, 'tcp', 'SGRule sets the right protocol for desc with numbers');
 is($rule->{Description}, $desc, 'SGRule sets the Description fileld with the right value');
+
+{
+  my $list = ELBListener(80, 'HTTP');
+  is_deeply(
+    $list,
+    { InstancePort => 80, InstanceProtocol => 'HTTP', LoadBalancerPort => 80, Protocol => 'HTTP' },
+    '2 param ELBListener HTTP balancer',
+  );
+}
+
+{
+  my $list = ELBListener(80, 'HTTP', 8080);
+  is_deeply(
+    $list,
+    { InstancePort => 8080, InstanceProtocol => 'HTTP', LoadBalancerPort => 80, Protocol => 'HTTP' },
+    '3 param ELBListener HTTP balancer. Elb listens on 80 and passes requests to 8080 on backends',
+  );
+}
+
+{
+  my $list = ELBListener(443, 'HTTPS', 80, 'HTTP');
+  is_deeply(
+    $list,
+    { InstancePort => 80, InstanceProtocol => 'HTTP', LoadBalancerPort => 443, Protocol => 'HTTPS' },
+    '4 param ELBListener HTTPS Offload',
+  );
+}
+
+{
+  my $list = TCPELBListener(3000);
+  is_deeply(
+    $list,
+    { InstancePort => 3000, InstanceProtocol => 'TCP', LoadBalancerPort => 3000, Protocol => 'TCP' },
+    '1 param TCPELBListener. Balance on port 3000',
+  );
+}
+
+{
+  my $list = TCPELBListener(3000, 6000);
+  is_deeply(
+    $list,
+    { InstancePort => 6000, InstanceProtocol => 'TCP', LoadBalancerPort => 3000, Protocol => 'TCP' },
+    '2 param TCPELBListener. Balance on port 3000 to backends on port 6000',
+  );
+}
 
 done_testing;
