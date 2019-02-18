@@ -71,6 +71,16 @@ package Fn;
     return { 'Fn::Or' => [ @conditions ] };
   }
 
+  # Generates { "Fn::Transform" : { "Name" : macro name, "Parameters" : {key : value, ... } } }
+  sub Transform {
+    my ($macro_name, $params) = @_;
+
+    return { 'Fn::Transform' => {
+      name => $macro_name,
+      parameters => $params,
+    }}
+  };
+
   sub Cidr {
     my ($ipblock, $count, $sizemask) = @_;
     if (defined $sizemask) {
