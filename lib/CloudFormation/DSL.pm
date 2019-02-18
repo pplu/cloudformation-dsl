@@ -21,7 +21,8 @@ package CloudFormation::DSL {
   our $ubuntu_release_table_url = 'https://cloud-images.ubuntu.com/locator/ec2/releasesTable';
 
   Moose::Exporter->setup_import_methods(
-    with_meta => [ 'resource', 'output', 'condition', 'mapping', 'metadata', 'stack_version', 'transform' ],
+    with_meta => [ 'parameter', 'attachment', 'resource', 'output', 'condition', 
+                   'mapping', 'metadata', 'stack_version', 'transform' ],
     as_is => [ qw/Ref ConditionRef GetAtt UserData CfString Parameter Attribute Json
                 Tag ELBListener TCPELBListener SGRule SGEgressRule 
                 GetASGStatus GetInstanceStatus FindUbuntuImage FindBaseImage SpecifyInSubClass/ ],
@@ -123,6 +124,97 @@ package CloudFormation::DSL {
       lazy => 1,
       default => $default_coderef,
     );
+  }
+
+  sub parameter {
+    my ($meta, $name, $type, $options, $extra) = @_;
+
+    if ($meta->find_attribute_by_name($name)) {
+      die "Redeclared resource/output/condition/parameter/mapping $name"
+    }
+    $extra = {}  unless(defined $extra);
+
+    my %args = ();
+    if (ref($options) eq 'CODE'){
+      %args = &$options();
+    } elsif (ref($options) eq 'HASH'){
+      %args = %$options;
+    }
+
+    my $attr_traits = $extra->{InStack}
+                    ? ['Parameter', 'StackParameter']
+                    : ['Parameter'];
+
+    $meta->add_attribute(
+      $name,
+      is  => 'rw',
+      isa => "Cfn::Parameter",
+      traits => $attr_traits,
+      lazy => 1,
+      Type => $type,
+      %args,
+      default => sub {
+        return Moose::Util::TypeConstraints::find_type_constraint('Cfn::Parameter')->coerce({
+          Type => $type,
+          %args,
+        });
+      },
+    );
+  }
+
+  sub attachment {
+    Moose->throw_error(
+      'Usage: attachment \'name\' => \'type\', {provides_key => provides_value, ... }'
+    ) if (@_ < 2);
+    my ($meta, $name, $type, $provides) = @_;
+
+    if ($meta->find_attribute_by_name($name)) {
+      die "Redeclared resource/output/condition/parameter/mapping $name"
+    }
+
+    # Add the attachment
+    $meta->add_attribute(
+      $name,
+      is     => 'rw',
+      isa    => 'Str',
+      Type   => 'String',
+      type   => $type,
+      traits => [ 'Parameter', 'Attachable' ],
+      generates_params => [ keys %$provides ],
+    );
+
+    # Every attachment will declare that it provides some extra parameters in the provides
+    # these will be converted in attributes. If they start with "-", then they will not be
+    # StackParameters, that is they will not be accessible in CF via a Ref.
+    foreach my $attribute (keys %$provides) {
+      my $lookup_in_attachment = $provides->{$attribute};
+
+      if ($meta->find_attribute_by_name($attribute)) {
+          Moose->throw_error("An attribute with name $attribute already exists");
+      }
+
+      my @extra_traits = ('Parameter');
+      if (substr($attribute,0,1) eq '-'){
+        # Strip off the '-' in the attribute name
+        substr($attribute,0,1) = '';
+      } else {
+        push @extra_traits, 'StackParameter';
+      }
+
+      $meta->add_attribute(
+        $attribute,
+        is      => 'rw',
+        isa     => 'Defined',
+        lazy    => 1,
+        traits  => [ @extra_traits ],
+        Type    => 'String',
+        default => sub {
+          my $params = $_[0];
+          my $param = $params->meta->find_attribute_by_name($name);
+          return $param->get_info($params->$name, $lookup_in_attachment)
+        },
+      );
+    }
   }
 
   sub output {

@@ -38,6 +38,25 @@ package CloudFormation::DSL::AttributeTrait::Transform {
   Moose::Util::meta_attribute_alias('Transform');
 }
 
+package CCfnX::Meta::Attribute::Trait::Parameter {
+  use Moose::Role;
+  Moose::Util::meta_attribute_alias('Parameter');
+
+  has Type    => (isa => 'Cfn::Parameter::Type', is => 'ro', required => 1);
+  has Default => (isa => 'Defined', is => 'rw');
+  has NoEcho  => (isa => 'Str', is => 'rw');
+  has AllowedValues  => (isa => 'ArrayRef[Str]', is => 'rw');
+  has AllowedPattern => (isa => 'Str', is => 'rw');
+  has MaxLength => (isa => 'Str', is => 'rw');
+  has MinLength => (isa => 'Str', is => 'rw');
+  has MaxValue  => (isa => 'Str', is => 'rw');
+  has MinValue  => (isa => 'Str', is => 'rw');
+  has Description => (isa => 'Str', is => 'rw');
+  has ConstraintDescription => (isa => 'Str', is => 'rw');
+
+  has Required => (isa => 'Bool', is => 'rw', lazy => 1, default => sub { shift->required });
+}
+
 package CloudFormation::DSL::AttributeTrait::PostOutput {
   use Moose::Role;
   Moose::Util::meta_attribute_alias('PostOutput');
