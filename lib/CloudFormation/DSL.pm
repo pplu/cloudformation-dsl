@@ -28,10 +28,20 @@ package CloudFormation::DSL {
     also  => 'Moose',
   );
 
+  # init_meta is used to make whoever uses CloudFormation::DSL to be a subclass
+  # of CloudFormation::DSL::Object
   sub init_meta {
     shift;
     my %args = @_;
     return Moose->init_meta(%args, base_class => 'CloudFormation::DSL::Object');
+  }
+
+  sub _throw_if_attribute_duplicate {
+    my ($meta, $attribute_name) = @_;
+
+    if ($meta->find_attribute_by_name($attribute_name)) {
+      die "Redeclared item \'$attribute_name\'";
+    }
   }
 
   sub transform {
@@ -39,9 +49,7 @@ package CloudFormation::DSL {
         if ( @_ < 1 );
     my ( $meta, @transforms ) = @_;
 
-    if ( $meta->find_attribute_by_name('transform') ) {
-      die "There is already a transform element in the template";
-    }
+    _throw_if_attribute_duplicate($meta, 'transform');
 
     # Allow just one of this to be declared
     $meta->add_attribute(
@@ -61,9 +69,7 @@ package CloudFormation::DSL {
         if (@_ != 3);
     my ( $meta, $name, $condition ) = @_;
 
-    if ($meta->find_attribute_by_name($name)){
-      die "Redeclared resource/output/condition/mapping $name";
-    }
+    _throw_if_attribute_duplicate($meta, $name);
 
     $meta->add_attribute(
       $name,
@@ -124,9 +130,7 @@ package CloudFormation::DSL {
         if ( @_ lt 3 and @_ gt 5  );
     my ( $meta, $name, $options, $extra ) = @_;
 
-    if ($meta->find_attribute_by_name($name)){
-      die "Redeclared resource/output/condition/mapping $name";
-    }
+    _throw_if_attribute_duplicate($meta, $name);
 
     $extra = {} if (not defined $extra);
 
@@ -168,9 +172,7 @@ package CloudFormation::DSL {
         if (@_ != 3);
     my ( $meta, $name, $options ) = @_;
 
-    if ($meta->find_attribute_by_name($name)){
-      die "Redeclared resource/output/condition/mapping $name";
-    }
+    _throw_if_attribute_duplicate($meta, $name);
 
     my %args = ();
     if (ref($options) eq 'CODE'){
@@ -196,9 +198,7 @@ package CloudFormation::DSL {
         if (@_ != 3);
     my ( $meta, $name, @options ) = @_;
 
-    if ($meta->find_attribute_by_name($name)){
-      die "Redeclared resource/output/condition/mapping $name";
-    }
+    _throw_if_attribute_duplicate($meta, $name);
 
     if (my ($att) = ($name =~ m/^\+(.*)/)) {
       $meta->add_attribute(
@@ -234,9 +234,7 @@ package CloudFormation::DSL {
 
     my $stack_version_attribute = 'StackVersion';
 
-    if ($meta->find_attribute_by_name($stack_version_attribute)){
-      die "duplicate stack_version";
-    }
+    _throw_if_attribute_duplicate($meta, $stack_version_attribute);
 
     $meta->add_attribute(
       $stack_version_attribute,

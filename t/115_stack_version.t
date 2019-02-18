@@ -52,6 +52,6 @@ throws_ok(sub {
   
     resource R1 => 'AWS::IAM::User', {};
   }
-}, qr/duplicate stack_version/);
+}, qr/Redeclared/);
 
 done_testing;
