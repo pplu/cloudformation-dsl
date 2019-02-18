@@ -1,4 +1,5 @@
 #!/usr/bin/env perl
+
 use strict;
 use warnings; 
 use feature 'say';
@@ -32,66 +33,46 @@ package TestClass {
     AttachParam1 => 'ip/address',
     -AttachParam2 => 'ip2/address',
   };
-  
-  output Output1 => Ref('X1');
-  output Output2 => Ref('X2');
-  
-  1;
 }
 
-my $meta = find_meta('TestClass');
-
-
-my $attr_count = scalar grep { $_ eq 'Param1' } $meta->get_attribute_list;
-is(1, $attr_count, "TestClass has an attribute 'Param1'");
-
 {
-  my $param1 = $meta->get_attribute('Param1'); 
-  isa_ok($param1->type_constraint->class, 'Cfn::Parameter', "'The attribute 'Param1' isa 'Cfn::Parameter'");
-  
-  ok($param1->does('Parameter'), "The attribute 'Param1' has the trait 'CCfnX::Meta::Attribute::Trait::Parameter'");
+  my $p = TestClass->meta->find_attribute_by_name('Param1');
+  ok(defined $p);
+  ok($p->does('Parameter'), "The attribute 'Param1' has the Parameter trait");
+}
+{
+  my $o = TestClass->new;
+
+  cmp_ok($o->ParameterCount, '==', 2);
+
+  my $param1 = $o->Param1;
+  isa_ok($param1, 'Cfn::Parameter', "'The attribute 'Param1' isa 'Cfn::Parameter'");
  
   is($param1->Type, 'String', "The attribute 'Param1' has a property 'Type' (set by 'parameter' function of 'CCfnX::Shortcuts')");
-  
   is($param1->Default, 'this is the default value', "The attribute 'Param1' has a property 'Default'");
-  
   is($param1->MaxLength, 30, "The attribute 'Param1' has a property 'MaxLength'");
-  
   is($param1->Description, 'Param1 Description', "The attribute 'Param1' has a property 'Description'");
 }
 
-$attr_count = scalar grep { $_ eq 'Param2' } $meta->get_attribute_list;
-is(1, $attr_count, "TestClass has an attribute 'Param2'");
+{  
+  my $p = TestClass->meta->find_attribute_by_name('Param2');
+  ok(defined $p, 'TestClass has a Param2 attribute');
+  ok($p->does('Parameter'), "The attribute 'Param1' has the Parameter trait");
+  ok($p->does('StackParameter'), "The attribute 'Param2' has the StackParameter trait");
+}
 
-my $param2 = $meta->get_attribute('Param2'); 
-ok($param2->does('StackParameter'), "The attribute 'Param2' has the trait 'CCfnX::Meta::Attribute::Trait::StackParameter");
+{  
+  my $p = TestClass->meta->find_attribute_by_name('Attach1');
+  ok(defined $p, 'TestClass has a Attach1 attribute');
+  ok($p->does('Attachable'), "The attribute 'Attach1' has the Attachable trait");
+}
 
-$attr_count = scalar grep { $_ eq 'Param3' } $meta->get_attribute_list;
-is(1, $attr_count, "TestClass has an attribute 'Param3'");
-
-my $param3 = $meta->get_attribute('Param3');
-ok($param3->Default, "The attribute 'Param3' has a Default set");
-
-$attr_count = scalar grep { $_ eq 'Attach1' } $meta->get_attribute_list;
-is(1, $attr_count, "TestClass has an attribute 'Attach1'");
-
-my $attach1 = $meta->get_attribute('Attach1');
-ok($attach1->does('Attachable'), "The attribute 'Attach1' has the trait 'CCfnX::Meta::Attribute::Trait::Attachable");
-
-$attr_count = scalar grep { $_ eq 'AttachParam1' } $meta->get_attribute_list;
-is(1, $attr_count, "TestClass has an attribute 'AttachParam1'");
-
-my $attachparam1 = $meta->get_attribute('AttachParam1');
-ok($attachparam1->does('StackParameter'), "The attribute 'AttachParam1' has the trait 'CCfnX::Meta::Attribute::Trait::StackParameter");
-
-$attr_count = scalar grep { $_ eq 'AttachParam2' } $meta->get_attribute_list;
-is(1, $attr_count, "TestClass has an attribute 'AttachParam2'");
-
-$attr_count = scalar grep { $_ eq 'Output1' } $meta->get_attribute_list;
-is(1, $attr_count, "TestClass has an attribute 'Output1'");
-
-$attr_count = scalar grep { $_ eq 'Output2' } $meta->get_attribute_list;
-is(1, $attr_count, "TestClass has an attribute 'Output2'");
+{  
+  my $p = TestClass->meta->find_attribute_by_name('AttachParam1');
+  ok(defined $p, 'TestClass has an AttachParam1 attribute');
+  ok($p->does('Parameter'), "The attribute 'AttachParam1' has the Parameter trait");
+  ok($p->does('StackParameter'), "The attribute 'AttachParam2' has the StackParameter trait");
+}
 
 package TestClass4Base {
   use CloudFormation::DSL;
@@ -105,8 +86,25 @@ package TestClass4Base {
   parameter 'Param2' => 'String', {
     MaxLength   => 20,
     Default     => 'param2 default',
-    Description => 'Param1 Description',
+    Description => 'Param2 Description',
   };
+}
+
+{
+  my $c1 = TestClass4Base->new;
+  my $param1 = $c1->Param1;
+  isa_ok($param1, 'Cfn::Parameter');
+  is($param1->Type, 'String', "The attribute 'Param1' has a property 'Type' (set by 'parameter' function of 'CCfnX::Shortcuts')"); 
+  is($param1->Default, 'param1 default', "The attribute 'Param1' has a property 'Default'");
+  is($param1->MaxLength, 30, "The attribute 'Param1' has a property 'MaxLength'");
+  is($param1->Description, 'Param1 Description', "The attribute 'Param1' has a property 'Description'");
+
+  my $param2 = $c1->Param2;
+  isa_ok($param2, 'Cfn::Parameter');
+  is($param2->Type, 'String', "The attribute 'Param2' has a property 'Type' (set by 'parameter' function of 'CCfnX::Shortcuts')"); 
+  is($param2->Default, 'param2 default', "The attribute 'Param2' has a property 'Default'");
+  is($param2->MaxLength, 20, "The attribute 'Param2' has a property 'MaxLength'");
+  is($param2->Description, 'Param2 Description', "The attribute 'Param2' has a property 'Description'");
 }
 
 package TestClass4 {
@@ -116,7 +114,7 @@ package TestClass4 {
   parameter '+Param2' => 'Number', {
     MaxLength   => 35,
     Default     => 'this is the default value',
-    Description => 'Param1 Description',
+    Description => 'Param2 Description',
   };
 
   parameter Param3 => 'String', {
@@ -125,19 +123,28 @@ package TestClass4 {
 }
 
 {
-  my $c1 = TestClass4Base->new;
-  cmp_ok($c1->params->Param1, 'eq', 'param1 default');
-  ok(not defined $c1->Parameter('Param1'));
-  cmp_ok($c1->params->Param2, 'eq', 'param2 default');
-  ok(not defined $c1->Parameter('Param2'));
- 
-  my $c2 = TestClass4->new;
-  cmp_ok($c2->params->Param1, 'eq', 'param1 default');
-  ok(not defined $c1->Parameter('Param1'));
-  cmp_ok($c2->params->Param2, 'eq', 'this is the default value');
-  ok(not defined $c1->Parameter('Param2'));
-  cmp_ok($c2->params->Param3, '==', 40);
-  ok(not defined $c1->Parameter('Param3'));
+  my $c1 = TestClass4->new;
+
+  # same tests as TestClass4Base for Param1 (since it doesn't get overwritten)
+  my $param1 = $c1->Param1;
+  isa_ok($param1, 'Cfn::Parameter');
+  is($param1->Type, 'String', "The attribute 'Param1' has a property 'Type' (set by 'parameter' function of 'CCfnX::Shortcuts')"); 
+  is($param1->Default, 'param1 default', "The attribute 'Param1' has a property 'Default'");
+  is($param1->MaxLength, 30, "The attribute 'Param1' has a property 'MaxLength'");
+  is($param1->Description, 'Param1 Description', "The attribute 'Param1' has a property 'Description'");
+
+  # Test overwritten parameters
+  my $param2 = $c1->Param2;
+  isa_ok($param2, 'Cfn::Parameter');
+  is($param2->Type, 'Number', "The attribute 'Param2' has a property 'Type' (set by 'parameter' function of 'CCfnX::Shortcuts')"); 
+  is($param2->Default, 'this is the default value', "The attribute 'Param2' has a property 'Default'");
+  is($param2->MaxLength, 35, "The attribute 'Param2' has a property 'MaxLength'");
+  is($param2->Description, 'Param2 Description', "The attribute 'Param2' has a property 'Description'");
+
+
+  my $param3 = $c1->Param3;
+  isa_ok($param3, 'Cfn::Parameter');
+  is($param3->Default, '40', "The attribute 'Param3' has a property 'Default'");
 }
  
 done_testing; 

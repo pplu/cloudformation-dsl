@@ -15,7 +15,7 @@ package CloudFormation::DSL {
   use Regexp::Common qw(net);
   use LWP::Simple;
   use JSON::MaybeXS;
-  use Scalar::Util qw(looks_like_number);
+  use Scalar::Util qw(looks_like_number blessed);
   use DateTime::Format::Strptime qw( );
 
   our $ubuntu_release_table_url = 'https://cloud-images.ubuntu.com/locator/ec2/releasesTable';
@@ -129,9 +129,7 @@ package CloudFormation::DSL {
   sub parameter {
     my ($meta, $name, $type, $options, $extra) = @_;
 
-    if ($meta->find_attribute_by_name($name)) {
-      die "Redeclared resource/output/condition/parameter/mapping $name"
-    }
+    _throw_if_attribute_duplicate($meta, $name);
     $extra = {}  unless(defined $extra);
 
     my %args = ();
@@ -151,8 +149,6 @@ package CloudFormation::DSL {
       isa => "Cfn::Parameter",
       traits => $attr_traits,
       lazy => 1,
-      Type => $type,
-      %args,
       default => sub {
         return Moose::Util::TypeConstraints::find_type_constraint('Cfn::Parameter')->coerce({
           Type => $type,
@@ -168,16 +164,13 @@ package CloudFormation::DSL {
     ) if (@_ < 2);
     my ($meta, $name, $type, $provides) = @_;
 
-    if ($meta->find_attribute_by_name($name)) {
-      die "Redeclared resource/output/condition/parameter/mapping $name"
-    }
+    _throw_if_attribute_duplicate($meta, $name);
 
     # Add the attachment
     $meta->add_attribute(
       $name,
       is     => 'rw',
       isa    => 'Str',
-      Type   => 'String',
       type   => $type,
       traits => [ 'Parameter', 'Attachable' ],
       generates_params => [ keys %$provides ],
@@ -204,14 +197,18 @@ package CloudFormation::DSL {
       $meta->add_attribute(
         $attribute,
         is      => 'rw',
-        isa     => 'Defined',
+        isa     => 'Str',
         lazy    => 1,
         traits  => [ @extra_traits ],
-        Type    => 'String',
         default => sub {
           my $params = $_[0];
           my $param = $params->meta->find_attribute_by_name($name);
-          return $param->get_info($params->$name, $lookup_in_attachment)
+          return Cfn::DynamicValue->new(Value => sub {
+            my $self = shift;
+	    return "TODO";
+	    $param->get_info($params->$name, $lookup_in_attachment);
+	    
+          });
         },
       );
     }
@@ -348,7 +345,7 @@ package CloudFormation::DSL {
     # or if it's being called as a shortcut
     #
     # TODO: decide how to fix the fact that Cfn has a Parameters method
-    if (@_ > 1){
+    if (blessed($_[0])){
       my ($self, $key, $value) = @_;
       if (defined $value) {
         # Setter

@@ -58,18 +58,11 @@ package CloudFormation::DSL::Object {
         $self->addMetadata($name, $self->$name);
       } elsif ($att->does('CloudFormation::DSL::AttributeTrait::Transform')){
         $self->addTransform($name, $self->$name);
+      } elsif ($att->does('CloudFormation::DSL::AttributeTrait::StackParameter')) {
+        my $type = $att->type_constraint->name;
+        $self->addParameter($name, _moose_to_cfn_class($type));
       }
     }
-
-    my $params_meta = $self->params->meta;
-    @attrs = $params_meta->get_all_attributes;
-    foreach my $param (@attrs) {
-      if ($param->does('CloudFormation::DSL::AttributeTrait::StackParameter')) {
-        my $type = $param->type_constraint->name;
-        $self->addParameter($param->name, _moose_to_cfn_class($type));
-      }
-    }
-
   }
 
   sub get_stackversion_from_metadata {
