@@ -3,6 +3,7 @@
 use strict;
 use warnings;
 use Test::More;
+use Test::Exception;
 
 package TestClass {
   use CloudFormation::DSL;
@@ -71,5 +72,23 @@ my $cfn = Cfn->new;
 $cfn->addMetadata({ 'k1' => 'v1' });
 my $hr = $cfn->as_hashref;
 is_deeply($hr,{Resources=>{},Metadata=>{k1=>'v1'}});
+
+throws_ok(sub {
+  package TestClass {
+    use CloudFormation::DSL;
+    use CCfnX::CommonArgs;
+    use CCfnX::InstanceArgs;
+  
+    has params => (is => 'ro', isa => 'CCfnX::CommonArgs', default => sub { CCfnX::InstanceArgs->new(
+      instance_type => 'x1.xlarge',
+      region => 'eu-west-1',
+      account => 'devel-capside',
+      name => 'NAME'
+    ); } );
+  
+    metadata 'MyMDTest5', { key1 => 'X' };
+    metadata 'MyMDTest5', { key1 => Ref('XXX') };
+  }
+}, qr/Redeclared/);
 
 done_testing;

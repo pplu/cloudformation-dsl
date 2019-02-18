@@ -196,6 +196,10 @@ package CloudFormation::DSL {
         if (@_ != 3);
     my ( $meta, $name, @options ) = @_;
 
+    if ($meta->find_attribute_by_name($name)){
+      die "Redeclared resource/output/condition/mapping $name";
+    }
+
     if (my ($att) = ($name =~ m/^\+(.*)/)) {
       $meta->add_attribute(
         $att,
