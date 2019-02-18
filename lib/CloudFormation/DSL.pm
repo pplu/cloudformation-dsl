@@ -232,8 +232,14 @@ package CloudFormation::DSL {
         if (@_ != 2);
     my ( $meta, $version ) = @_;
 
+    my $stack_version_attribute = 'StackVersion';
+
+    if ($meta->find_attribute_by_name($stack_version_attribute)){
+      die "duplicate stack_version";
+    }
+
     $meta->add_attribute(
-      'StackVersion',
+      $stack_version_attribute,
       is => 'rw',
       isa => 'Cfn::Value',
       coerce => 1,
