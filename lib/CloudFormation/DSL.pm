@@ -313,7 +313,9 @@ package CloudFormation::DSL {
 
   sub Json {
     my $json = shift;
-    return decode_json($json);
+    my $result = eval { decode_json($json) };
+    die "Error decoding Json: $@" if ($@);
+    return $result;
   }
 
   sub GetAtt {
