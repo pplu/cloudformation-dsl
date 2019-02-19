@@ -5,78 +5,89 @@ use warnings;
 use Test::More;
 use Test::Exception;
 
-use CloudFormation::DSL::Traits;
-
 throws_ok {
-  package TestArgs {
-    use Moose;
-    extends 'CCfnX::CommonArgs';
-    use CCfnX::Attachments;
-    attachment att1 => (
-      type          => 'test',
-      documentation => 'test-attachment',
-      provides      => {
-        att1 => 'value',
-      }
-    );
+  package TestDuplicate {
+    use CloudFormation::DSL;
+
+    attachment att1 => 'Test', {
+      att1 => 'value'
+    };
   }
 } qr/already exists/, "Can't create args with two equal parameter names";
 
-
 package TestAttach {
-  use Moose;
-  extends 'CCfnX::CommonArgs';
-  use CCfnX::Attachments;
+  use CloudFormation::DSL;
 
-  attachment Attachment => (
-    type          => 'test',
-    documentation => 'test-attachment',
-    provides      => {
-      Att => 'value',
-    }
-  );
+  attachment Attachment => 'Test', {
+    IAMPath => 'iam_path',
+    -IAMPathStatic => 'iam_path',
+  };
+
+  resource R1 => 'AWS::IAM::User', {
+    Path => Ref('IAMPath'),
+  };
+  resource R2 => 'AWS::IAM::User', {
+    Path => Parameter('IAMPathStatic'),
+  };
+
 }
 
 {
-  my $params = TestAttach->new_with_options(Att => 'Manual Value', name => 'X', region => 'X', account => 'devel-capside');
-  cmp_ok($params->Att, 'eq', 'Manual Value', 'Can specify an argument from an attachment without specifying the attachment');
+  my $arch = TestAttach->new();
+  throws_ok(sub { $arch->IAMPath->Value->($arch), 'eq', '/iampath/path1' },
+	    qr/Can\'t resolve attachments without an attachment_resolver/,
+	    'attachments aren\'t resolved without an attachment resolver',
+  );
 }
+
+package TestAttachmentResolver {
+  use Moose;
+  with 'CloudFormation::DSL::AttachmentResolver';
+
+  sub resolve {
+    my ($self, $name, $type, $lookup_key) = @_;
+
+    return '/iampath/path1' if ($type eq 'Test' and $lookup_key eq 'iam_path');
+    die "Can't resolve attachment for $name of type $type for lookup_key $lookup_key";
+  } 
+}
+
+{
+  my $arch = TestAttach->new(params => { Attachment => 'Stack1' }, attachment_resolver => TestAttachmentResolver->new);
+  isa_ok($arch->IAMPath, 'Cfn::Parameter');
+  cmp_ok($arch->IAMPath->Value->($arch), 'eq', '/iampath/path1', 'Got the appropiate value returned from the IAMPath parameter');
+
+use Data::Dumper;
+print Dumper($arch->as_hashref);
+  #cmp_ok($params->Att->Value, 'eq', 'Manual Value', 'Can specify an argument from an attachment without specifying the attachment');
+  cmp_ok($arch->as_hashref->{Resources}{R2}{Properties}{Path}, 'eq', '/iampath/path1');
+}
+
+
 
 throws_ok {
   package TestArgsWithDefault {
-    use Moose;
-    extends 'CCfnX::CommonArgs';
-    use CCfnX::Attachments;
-    attachment att1 => (
-      type          => 'test',
-      documentation => 'test-attachment',
-      default       => 'SomeAttachedStack',
-      provides      => {
-        att1 => 'value',
-      }
-    );
+    use CloudFormation::DSL;
+    attachment att1 => 'Test', {
+      att1 => 'value',
+    };
   }
 } qr/already exists/, "Can't create args with two equal parameter names";
 
 
 package TestAttachWithDefault {
-  use Moose;
-  extends 'CCfnX::CommonArgs';
-  use CCfnX::Attachments;
+  use CloudFormation::DSL;
 
-  attachment Attachment => (
-    type          => 'test',
-    documentation => 'test-attachment',
-    default       => 'SomeAttachedStack',
-    provides      => {
-      Att => 'value',
-    }
-  );
+  attachment Attachment => 'Test', {
+    Att => 'value' 
+  }, {
+    Default => 'SomeAttachedStack'
+  };
 }
 
 {
-  my $params = TestAttachWithDefault->new_with_options(name => 'X', region => 'X', account => 'devel-capside');
-  cmp_ok($params->Attachment, 'eq', 'SomeAttachedStack', 'Can specify a default value for the attachment');
+  my $t = TestAttachWithDefault->new();
+  cmp_ok($t->Attachment, 'eq', 'SomeAttachedStack', 'Can specify a default value for the attachment');
 }
 
 done_testing;
