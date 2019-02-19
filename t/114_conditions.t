@@ -6,15 +6,6 @@ use Test::More;
 
 package TestClass {
   use CloudFormation::DSL;
-  use CCfnX::CommonArgs;
-  use CCfnX::InstanceArgs;
-
-  has params => (is => 'ro', isa => 'CCfnX::CommonArgs', default => sub { CCfnX::InstanceArgs->new(
-    instance_type => 'x1.xlarge',
-    region => 'eu-west-1',
-    account => 'devel-capside',
-    name => 'NAME'
-  ); } );
 
   condition CreateProdResources => Fn::Equals(Ref('EnvType'), "prod");
 

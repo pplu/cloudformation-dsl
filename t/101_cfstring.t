@@ -6,13 +6,6 @@ use Test::More;
 
 package TestClass {
   use CloudFormation::DSL;
-  use CCfnX::CommonArgs;
-
-  has params => (is => 'ro', isa => 'CCfnX::CommonArgs', default => sub { CCfnX::CommonArgs->new(
-    region => 'eu-west-1',
-    account => 'devel-capside',
-    name => 'NAME'
-  ); } );
 
   resource StaticPolicy => 'AWS::S3::BucketPolicy', {
     Bucket => { Ref => 'AppBucket' },
