@@ -197,17 +197,14 @@ package CloudFormation::DSL {
       $meta->add_attribute(
         $attribute,
         is      => 'rw',
-        isa     => 'Str',
+        isa     => 'Cfn::DynamicValue',
         lazy    => 1,
         traits  => [ @extra_traits ],
         default => sub {
-          my $params = $_[0];
-          my $param = $params->meta->find_attribute_by_name($name);
+          my $cfn = $_[0];
           return Cfn::DynamicValue->new(Value => sub {
             my $self = shift;
-	    return "TODO";
-	    $param->get_info($params->$name, $lookup_in_attachment);
-	    
+	    $cfn->resolve_attachment($name, $type, $lookup_in_attachment); 
           });
         },
       );
@@ -362,7 +359,7 @@ package CloudFormation::DSL {
     return Cfn::DynamicValue->new(Value => sub {
       my $cfn = shift;
       Moose->throw_error("DynamicValue didn't get it's context") if (not defined $cfn);
-      return $cfn->params->$param
+      return $cfn->params->$param;
     });
   }
 

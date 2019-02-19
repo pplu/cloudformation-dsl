@@ -1,9 +1,37 @@
 use CloudFormation::DSL::Traits;
 # Load all Cfn objects from Cfn since we'll inherit from Cfn
 use Cfn;
+
+use Hash::AsObject;
+use Moose::Util::TypeConstraints;
+
+subtype 'ObjectifiedHash',
+     as 'Hash::AsObject';
+
+coerce 'ObjectifiedHash',
+  from 'HashRef',
+   via { Hash::AsObject->new($_) };
+
 package CloudFormation::DSL::Object {
   use Moose;
   extends 'Cfn';
+
+  has attachment_resolver => (
+    is => 'ro',
+    does => 'CloudFormation::DSL::AttachmentResolver',
+  );
+
+  sub resolve_attachment {
+    my ($self, $name, $type, $lookup_key) = @_;
+    die "Can't resolve attachments without an attachment_resolver" if (not defined $self->attachment_resolver);
+    return $self->attachment_resolver->resolve($name, $type, $lookup_key);
+  };
+
+  has params => (
+    is => 'ro',
+    isa => 'ObjectifiedHash',
+    coerce => 1,
+  );
 
   has stash => (
     is => 'ro',
