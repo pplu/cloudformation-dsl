@@ -116,6 +116,10 @@ package CloudFormation::DSL {
       extra => $extra,
     });
 
+    my %context = Moose::Util::_caller_info;
+    $context{context} = 'resource declaration';
+    $context{type} = 'DSL';
+
     $meta->add_attribute(
       $name,
       is => 'rw',
@@ -123,6 +127,7 @@ package CloudFormation::DSL {
       traits => [ 'Resource' ],
       lazy => 1,
       default => $default_coderef,
+      definition_context => \%context,
     );
   }
 
