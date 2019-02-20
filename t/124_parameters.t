@@ -31,7 +31,7 @@ package TestClass {
   };
 
   parameter Param3 => 'Number', {
-    Default => sub { 314 },
+    Default => 314,
     Description => 'Param3 description',
   };
 
