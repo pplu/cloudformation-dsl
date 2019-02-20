@@ -6,8 +6,6 @@ use warnings;
 use Data::Printer;
 use Test::More;
 
-use Cfn;
-
 package TestClass {
   use CloudFormation::DSL;
 

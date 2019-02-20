@@ -2,8 +2,6 @@
 
 use strict;
 use warnings;
-
-use Cfn;
 use Test::More;
 
 {
