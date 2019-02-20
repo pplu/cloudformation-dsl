@@ -2,8 +2,6 @@
 
 use strict;
 use warnings;
-
-use Cfn;
 use Test::More;
 
 use Moose::Util::TypeConstraints;
@@ -25,19 +23,23 @@ package Cfn::Resource::Test1 {
   has Properties => (is => 'rw', isa => 'Cfn::Resource::Properties::Test1', required => 1, coerce => 1);
 }
 
-my $cfn = Cfn->new;
+package TestClass {
+  use CloudFormation::DSL;
 
-$cfn->addResource('ResourceWithCondition', 'Test1', Prop1 => 'Test', Prop2 => 'Test');
-$cfn->Resource('ResourceWithCondition')->Condition('MyCondition');
+  condition MyCondition => Fn::Equals(Ref('EnvType'), "prod");
 
-$cfn->addResource('ResourceWithoutCondition', 'Test1', Prop1 => 'Test', Prop2 => 'Test' );
+  resource ResourceWithCondition => 'Test1', {
+    Prop1 => 'Test',
+    Prop2 => 'Test',
+  }, {
+    Condition => 'MyCondition',
+  };
 
-$cfn->addCondition('MyCondition', {"Fn::Equals" => [{"Ref" => "EnvType"}, "prod"]});
+  output o1 => 'Output1';
+  output o2 => 'Output2', { Condition => 'MyCondition' };
+}
 
-$cfn->addOutput('o1', 'Output1');
-$cfn->addOutput('o2', 'Output2', Condition => 'MyCondition');
-
-my $hr = $cfn->as_hashref;
+my $hr = TestClass->new->as_hashref;
 
 is_deeply($hr->{Conditions}->{MyCondition}, { 'Fn::Equals' => [ { 'Ref' => 'EnvType' }, 'prod' ] }, 'MyCondition correctly returned');
 
