@@ -8,6 +8,12 @@ use Moose::Util 'find_meta';
 use Test::More;
 use Test::Exception;
 
+package AttachmentResolver {
+  use Moose;
+  with 'CloudFormation::DSL::AttachmentResolver';
+  sub resolve { return 'STUB' }
+}
+
 package TestClass {
   use CloudFormation::DSL;
 
@@ -41,7 +47,7 @@ package TestClass {
   ok($p->does('Parameter'), "The attribute 'Param1' has the Parameter trait");
 }
 {
-  my $o = TestClass->new;
+  my $o = TestClass->new(attachment_resolver => AttachmentResolver->new);
 
   cmp_ok($o->ParameterCount, '==', 2);
 

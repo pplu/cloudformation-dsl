@@ -25,6 +25,7 @@ package CloudFormation::DSL::Object {
     is => 'ro',
     isa => 'ObjectifiedHash',
     coerce => 1,
+    default => sub { Hash::AsObject->new({}) },
   );
 
   has stash => (
