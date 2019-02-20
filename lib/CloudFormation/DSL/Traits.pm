@@ -38,6 +38,11 @@ package CloudFormation::DSL::AttributeTrait::Transform {
   Moose::Util::meta_attribute_alias('Transform');
 }
 
+package CloudFormation::DSL::AttributeTrait::Parameter {
+  use Moose::Role;
+  Moose::Util::meta_attribute_alias('Parameter');
+}
+
 package CloudFormation::DSL::AttributeTrait::PostOutput {
   use Moose::Role;
   Moose::Util::meta_attribute_alias('PostOutput');
@@ -53,11 +58,8 @@ package CloudFormation::DSL::AttributeTrait::Attachable {
   Moose::Util::meta_attribute_alias('Attachable');
   has type => (is => 'ro', isa => 'Str', required => 1);
   has generates_params => (is => 'ro', isa => 'ArrayRef[Str]', required => 1);
-
-  sub get_info {
-    my ($self, $name, $key) = @_;
-    die "Not implemented";
-  }
+  has provides => (is => 'ro', isa => 'HashRef', required => 1);
+  has attachment_properties => (is => 'ro', isa => 'HashRef', required => 1);
 }
 
 1;

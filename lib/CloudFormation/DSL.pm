@@ -15,13 +15,14 @@ package CloudFormation::DSL {
   use Regexp::Common qw(net);
   use LWP::Simple;
   use JSON::MaybeXS;
-  use Scalar::Util qw(looks_like_number);
+  use Scalar::Util qw(looks_like_number blessed);
   use DateTime::Format::Strptime qw( );
 
   our $ubuntu_release_table_url = 'https://cloud-images.ubuntu.com/locator/ec2/releasesTable';
 
   Moose::Exporter->setup_import_methods(
-    with_meta => [ 'resource', 'output', 'condition', 'mapping', 'metadata', 'stack_version', 'transform' ],
+    with_meta => [ 'parameter', 'attachment', 'resource', 'output', 'condition', 
+                   'mapping', 'metadata', 'stack_version', 'transform' ],
     as_is => [ qw/Ref ConditionRef GetAtt UserData CfString Parameter Attribute Json
                 Tag ELBListener TCPELBListener SGRule SGEgressRule 
                 GetASGStatus GetInstanceStatus FindUbuntuImage FindBaseImage SpecifyInSubClass/ ],
@@ -123,6 +124,101 @@ package CloudFormation::DSL {
       lazy => 1,
       default => $default_coderef,
     );
+  }
+
+  sub parameter {
+    my ($meta, $name, $type, $options, $extra) = @_;
+
+    _throw_if_attribute_duplicate($meta, $name);
+    $extra = {}  unless(defined $extra);
+
+    my %args = ();
+    if (ref($options) eq 'CODE'){
+      %args = &$options();
+    } elsif (ref($options) eq 'HASH'){
+      %args = %$options;
+    }
+
+    my $attr_traits = $extra->{InStack}
+                    ? ['Parameter', 'StackParameter']
+                    : ['Parameter'];
+
+    $meta->add_attribute(
+      $name,
+      is  => 'rw',
+      isa => "Cfn::Parameter",
+      traits => $attr_traits,
+      lazy => 1,
+      default => sub {
+        return Moose::Util::TypeConstraints::find_type_constraint('Cfn::Parameter')->coerce({
+          Type => $type,
+          %args,
+        });
+      },
+    );
+  }
+
+  sub _attachment_map {
+    my $provides = shift;
+    my @map;
+    foreach my $key (keys %$provides) {
+      my $info = {};
+
+      if (substr($key,0,1) eq '-'){
+        # Strip off the '-' in the attribute name
+        my $attribute_name = $key;
+	substr($attribute_name,0,1) = '';
+	$info->{ attribute_name } = $attribute_name;
+	$info->{ lookup_name } = $provides->{ $key };
+	$info->{ in_stack } = 0;
+      } else {
+	$info->{ attribute_name } = $key;
+	$info->{ lookup_name } = $provides->{ $key };
+	$info->{ in_stack } = 1;
+      }
+      push @map, $info;
+    }
+    return \@map;
+  }
+
+  sub attachment {
+    Moose->throw_error(
+      'Usage: attachment \'name\' => \'type\', {provides_key => provides_value, ... }[, { Default => \'...\' }]'
+    ) if (@_ < 2);
+    my ($meta, $name, $type, $provides, $attachment_properties) = @_;
+
+    _throw_if_attribute_duplicate($meta, $name);
+
+    die "the provides parameter has to be a hashref" if (defined $provides and ref($provides) ne 'HASH');
+    my $attachment_map = _attachment_map($provides);
+
+    $attachment_properties = {} if (not defined $attachment_properties);
+    die "the attachment_properties has to be a hashref" if (ref($attachment_properties) ne 'HASH');
+
+    # Add the attachment
+    $meta->add_attribute(
+      $name,
+      is     => 'rw',
+      isa    => 'Str',
+      type   => $type,
+      traits => [ 'Parameter', 'Attachable' ],
+      generates_params => [ map { $_->{ attribute_name } } @$attachment_map ],
+      provides => { map { ($_->{ attribute_name } => $_->{ lookup_name }) } @$attachment_map },
+      attachment_properties => $attachment_properties,
+    );
+
+    # Every attachment will declare that it provides some extra parameters in the provides
+    # these will be converted in attributes. If they start with "-", then they will not be
+    # StackParameters, that is they will not be accessible in CF via a Ref.
+    foreach my $parameter (@$attachment_map) {
+      _throw_if_attribute_duplicate($meta, $parameter->{ attribute_name });
+
+      if ($parameter->{ in_stack }) {
+        parameter($meta, $parameter->{ attribute_name }, 'String', {}, { InStack => 1 });
+      } else {
+        parameter($meta, $parameter->{ attribute_name }, 'String', {}, { });
+      }
+    }
   }
 
   sub output {
@@ -256,7 +352,7 @@ package CloudFormation::DSL {
     # or if it's being called as a shortcut
     #
     # TODO: decide how to fix the fact that Cfn has a Parameters method
-    if (@_ > 1){
+    if (blessed($_[0])){
       my ($self, $key, $value) = @_;
       if (defined $value) {
         # Setter
@@ -273,7 +369,7 @@ package CloudFormation::DSL {
     return Cfn::DynamicValue->new(Value => sub {
       my $cfn = shift;
       Moose->throw_error("DynamicValue didn't get it's context") if (not defined $cfn);
-      return $cfn->params->$param
+      return $cfn->params->$param;
     });
   }
 

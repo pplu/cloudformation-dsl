@@ -4,22 +4,11 @@ use strict;
 use warnings;
 use Test::More;
 
-package TestClassParams {
-  use Moose;
-  extends 'CCfnX::InstanceArgs';
-  has 'stack_param' => (is => 'ro', isa => 'Str', required => 1, traits => [ 'StackParameter' ]);
-}
-
 package TestClass {
   use CloudFormation::DSL;
 
-  has params => (is => 'ro', isa => 'TestClassParams', default => sub { TestClassParams->new(
-    instance_type => 'x1.xlarge',
-    region => 'eu-west-1',
-    account => 'devel-capside',
-    name => 'NAME',
-    stack_param => 'VALUE',
-  ); } );
+  parameter stack_param => 'String', { Required => 1  }, { InStack => 1 };
+  parameter instance_type => 'String', { Default => 'x1.xlarge' };
 
   resource Instance => 'AWS::EC2::Instance', {
     ImageId => 'ami-XXXXXX', 

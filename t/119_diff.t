@@ -9,9 +9,6 @@ use Cfn::Diff;
 package Test401::Stack1 {
   use CloudFormation::DSL;
 
-  use CCfnX::CommonArgs;
-  has params => (is => 'ro', default => sub { CCfnX::CommonArgs->new(account => 'X', name => 'N', region => 'X') });
-
   resource r1 => 'AWS::EC2::Instance', {
     ImageId => 'X',
   }
@@ -19,9 +16,6 @@ package Test401::Stack1 {
 
 package Test401::Stack1ChangeR1 {
   use CloudFormation::DSL;
-
-  use CCfnX::CommonArgs;
-  has params => (is => 'ro', default => sub { CCfnX::CommonArgs->new(account => 'X', name => 'N', region => 'X') });
 
   resource r1 => 'AWS::IAM::User', {
   }
@@ -31,9 +25,6 @@ package Test401::Stack1ChangeR1 {
 package Test401::Stack2 {
   use CloudFormation::DSL;
 
-  use CCfnX::CommonArgs;
-  has params => (is => 'ro', default => sub { CCfnX::CommonArgs->new(account => 'X', name => 'N', region => 'X') });
-
   resource r2 => 'AWS::EC2::Instance', {
     ImageId => 'Y',
   }
@@ -42,9 +33,6 @@ package Test401::Stack2 {
 package Test401::Stack3 {
   use CloudFormation::DSL;
 
-  use CCfnX::CommonArgs;
-  has params => (is => 'ro', default => sub { CCfnX::CommonArgs->new(account => 'X', name => 'N', region => 'X') });
-
   resource r1 => 'AWS::EC2::Instance', {
     ImageId => 'Y',
   }
@@ -52,9 +40,6 @@ package Test401::Stack3 {
 
 package Test401::Stack4 {
   use CloudFormation::DSL;
-
-  use CCfnX::CommonArgs;
-  has params => (is => 'ro', default => sub { CCfnX::CommonArgs->new(account => 'X', name => 'N', region => 'X') });
 
   resource r1 => 'AWS::EC2::Instance', {
     ImageId => 'Y',
@@ -65,9 +50,6 @@ package Test401::Stack4 {
 package Test401::Stack5 {
   use CloudFormation::DSL;
 
-  use CCfnX::CommonArgs;
-  has params => (is => 'ro', default => sub { CCfnX::CommonArgs->new(account => 'X', name => 'N', region => 'X') });
-
   resource r1 => 'AWS::EC2::Instance', {
     ImageId => 'Y',
     KeyName => 'test_key',
@@ -77,9 +59,6 @@ package Test401::Stack5 {
 package Test401::Stack6 {
   use CloudFormation::DSL;
 
-  use CCfnX::CommonArgs;
-  has params => (is => 'ro', default => sub { CCfnX::CommonArgs->new(account => 'X', name => 'N', region => 'X') });
-
   resource r1 => 'AWS::EC2::Instance', {
     ImageId => 'Y',
     KeyName => Ref('param'),
@@ -88,9 +67,6 @@ package Test401::Stack6 {
 
 package Test401::Stack7 {
   use CloudFormation::DSL;
-
-  use CCfnX::CommonArgs;
-  has params => (is => 'ro', default => sub { CCfnX::CommonArgs->new(account => 'X', name => 'N', region => 'X') });
 
   resource DNS => 'AWS::Route53::RecordSet', {
    HostedZoneName => Ref('ZoneName'),
@@ -103,17 +79,10 @@ package Test401::Stack7 {
   };
 }
 
-package Test401::Stack8Params {
-  use CCfnX::CommonArgs;
-  use Moose;
-  extends 'CCfnX::CommonArgs';
-  has dns_type => (is => 'ro', isa => 'Str', default => 'CNAME');
-}
-
 package Test401::Stack8 {
   use CloudFormation::DSL;
   
-  has params => (is => 'ro', default => sub { Test401::Stack8Params->new(account => 'X', name => 'N', region => 'X') });
+  parameter dns_type => 'String', { Default => 'CNAME' };
 
   resource DNS => 'AWS::Route53::RecordSet', {
    HostedZoneName => Ref('ZoneName'),
@@ -129,9 +98,6 @@ package Test401::Stack8 {
 package Test401::Stack9 {
   use CloudFormation::DSL;
 
-  use CCfnX::CommonArgs;
-  has params => (is => 'ro', default => sub { CCfnX::CommonArgs->new(account => 'X', name => 'N', region => 'X') });
-
   resource CR => 'AWS::CloudFormation::CustomResource', {
     ServiceToken => 'ST',
     Prop1 => 'X',
@@ -142,9 +108,6 @@ package Test401::Stack9 {
 
 package Test401::Stack10 {
   use CloudFormation::DSL;
-
-  use CCfnX::CommonArgs;
-  has params => (is => 'ro', default => sub { CCfnX::CommonArgs->new(account => 'X', name => 'N', region => 'X') });
 
   resource CR => 'Custom::CR', {
     ServiceToken => 'ST',

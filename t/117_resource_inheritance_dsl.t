@@ -8,20 +8,10 @@ use Data::Dumper;
 $Data::Dumper::Indent=1;
 
 
-package SuperClassParams {
-  use Moose;
-  extends 'CCfnX::CommonArgs';
-  has '+region' => (default => 'eu-west-1');
-  has '+account' => (default => 'devel-capside');
-  has '+name' => (default => 'DefaultName');
-  has SG1 => (is => 'ro', isa => 'Str', default => 'sg-xxxxx');
-
-}
-
 package SuperClass {
   use CloudFormation::DSL;
 
-  has params => (is => 'ro', isa => 'SuperClassParams', default => sub { SuperClassParams->new() });
+  parameter SG1 => 'String', { Default => 'sg-xxxxx' };
 
   resource SG => 'AWS::EC2::SecurityGroup', {
     VpcId => Ref('VPC'),
@@ -36,7 +26,7 @@ package SuperClass {
 package SuperClassDynamicValue {
   use CloudFormation::DSL;
 
-  has params => (is => 'ro', isa => 'SuperClassParams', default => sub { SuperClassParams->new() });
+  parameter SG1 => 'String', { Default => 'sg-xxxxx' };
 
   resource SG => 'AWS::EC2::SecurityGroup', {
     VpcId => Ref('VPC'),
@@ -68,8 +58,6 @@ package SuperClassDynamicValue {
 
   my $cfn = ChildClassReplace->new();
   my $hash = $cfn->as_hashref;
-
-  #print Dumper($hash);
 
   is_deeply($hash->{Resources}{SG}{Properties}, {
     'VpcId' => 'vpc-xxxx',
@@ -103,8 +91,6 @@ package SuperClassDynamicValue {
   my $cfn = ChildClassDelete->new();
   my $hash = $cfn->as_hashref;
 
-  #print Dumper($hash);
-
   is_deeply($hash->{Resources}{SG}{Properties}, {
     'GroupDescription' => 'Original description',
     'VpcId' => {
@@ -134,8 +120,6 @@ package SuperClassDynamicValue {
 
   my $cfn = ChildClassMerge->new();
   my $hash = $cfn->as_hashref;
-
-  #print Dumper($hash);
 
   is_deeply($hash->{Resources}{SG}{Properties}, {
     'SecurityGroupIngress' => [
@@ -375,18 +359,9 @@ package ChildClassMixed {
 #
 
 {
-  package Params {
-    use Moose;
-    extends 'SuperClassParams';
-
-    has port => (is => 'ro', isa => 'Str', default => '12345');
-  }
-
   package MergeDynamicValueFromOrigin2 {
     use CloudFormation::DSL;
     extends 'SuperClassDynamicValue';
-
-    has '+params' => (isa => 'Params', default => sub { Params->new() });
 
     resource '+SG' => 'AWS::EC2::SecurityGroup', {
       '~SecurityGroupIngress' => [
@@ -427,8 +402,6 @@ package ChildClassMixed {
 
   package DeeperMergeSuperClass {
     use CloudFormation::DSL;
-
-    has params => (is => 'ro', isa => 'SuperClassParams', default => sub { SuperClassParams->new() });
 
     resource Role => 'AWS::IAM::Role', {
       Path => '/',
@@ -512,8 +485,6 @@ package ChildClassMixed {
   package SuperClassWithHashProp {
     use CloudFormation::DSL;
 
-    has params => (is => 'ro', isa => 'SuperClassParams', default => sub { SuperClassParams->new() });
-
     resource 'ParameterGroup' => 'AWS::RDS::DBParameterGroup', {
       Description => 'X',
       Family => 'Y',
@@ -553,8 +524,6 @@ package ChildClassMixed {
   package SuperClassWithExtra {
     use CloudFormation::DSL;
 
-    has params => (is => 'ro', isa => 'SuperClassParams', default => sub { SuperClassParams->new() });
-
     resource SG => 'AWS::EC2::SecurityGroup', {
       VpcId => Ref('VPC'),
       GroupDescription => 'Original description',
@@ -583,8 +552,6 @@ package ChildClassMixed {
   package ChildClassWithExtra {
     use CloudFormation::DSL;
     extends 'SuperClassWithExtra';
-
-    has params => (is => 'ro', isa => 'SuperClassParams', default => sub { SuperClassParams->new() });
 
     resource '+SG' => 'AWS::EC2::SecurityGroup', {
       '+VpcId' => 'vpc-xyz',

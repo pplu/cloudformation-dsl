@@ -8,20 +8,10 @@ use Test::More;
 # destination depending on the second parameter. That could be an IP address (v4 or
 # v6, a Ref() or a Parameter()
 
-package Params {
-    use Moose;
-    with 'MooseX::Getopt';
-
-    # Literal string, this should generate a SourceSecurityGroupIngress
-    has sgname => (is => 'ro', isa => 'Str', required => 1);
-
-}
-
 package TestClass {
     use CloudFormation::DSL;
 
-    has params => (is => 'ro', isa => 'Params',
-            default => sub { Params->new( sgname => 'sg-dabacabab') });
+    parameter sgname => 'String', { Default => 'sg-dabacabab' };
 
     resource SGSource => 'AWS::EC2::SecurityGroup', {
         GroupDescription => 'Test SG to be used as a Ref() source',

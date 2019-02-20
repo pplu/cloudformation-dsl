@@ -7,15 +7,6 @@ use Data::Printer;
 
 package TestClass {
   use CloudFormation::DSL;
-  use CCfnX::CommonArgs;
-  use CCfnX::InstanceArgs;
-
-  has params => (is => 'ro', isa => 'CCfnX::CommonArgs', default => sub { CCfnX::InstanceArgs->new(
-    instance_type => 'x1.xlarge',
-    region => 'eu-west-1',
-    account => 'devel-capside',
-    name => 'NAME'
-  ); } );
 
   output 'output1', Ref('XXX');
   output 'output2', GetAtt('XXX', 'InstanceID');
@@ -29,10 +20,6 @@ package TestClass {
 
 package TestClassAddOutput {
   use CloudFormation::DSL;
-  use CCfnX::CommonArgs;
-
-  has params => (is => 'ro', default => sub { CCfnX::CommonArgs->new(account => 'X', name => 'N', region => 'X') });
-
 }
 
 my $obj = TestClass->new;

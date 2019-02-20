@@ -9,14 +9,6 @@ $Data::Dumper::Indent=1;
 {
   package TestClass {
     use CloudFormation::DSL;
-    use CCfnX::CommonArgs;
-
-    has params => (is => 'ro', isa => 'CCfnX::CommonArgs',
-            default => sub { CCfnX::CommonArgs->new( 
-                             region => 'eu-west-1',
-                             account => 'my-account',
-                             name => 'my-name',
-                            )});
 
     resource SGDestination => 'AWS::EC2::SecurityGroup', {
       GroupDescription => 'Test SG to be used as a Ref() destination',

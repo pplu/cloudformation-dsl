@@ -6,15 +6,6 @@ use Test::More;
 
 package PolicyTest {
   use CloudFormation::DSL;
-  use CCfnX::CommonArgs;
-
-  has params => (is => 'ro', isa => 'CCfnX::CommonArgs', default => sub {
-    CCfnX::CommonArgs->new(
-      region => 'fake',
-      account => 'devel-capside',
-      name   => 'PolicyTest',
-    );
-  });
 
   resource Policy => 'AWS::IAM::Policy', {
     PolicyName => 'AbilityToGetMetadata',

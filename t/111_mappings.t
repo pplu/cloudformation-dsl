@@ -7,14 +7,6 @@ use Test::More;
 
 package TestClass {
   use CloudFormation::DSL;
-  use CCfnX::InstanceArgs;
-
-  has params => (is => 'ro', isa => 'CCfnX::InstanceArgs', default => sub { CCfnX::InstanceArgs->new(
-    instance_type => 'x1.xlarge',
-    region => 'eu-west-1',
-    account => 'devel-capside',
-    name => 'NAME'
-  ); } );
 
   mapping Map1 => {
     key1 => 'value1',
@@ -38,14 +30,6 @@ cmp_ok($struct->{Mappings}{Map2}{key2}, 'eq', 'value2', 'Got a value for a key o
 eval {
   package TestClass2 {
     use CloudFormation::DSL;
-    use CCfnX::InstanceArgs;
-  
-    has params => (is => 'ro', isa => 'CCfnX::InstanceArgs', default => sub { CCfnX::InstanceArgs->new(
-      instance_type => 'x1.xlarge',
-      region => 'eu-west-1',
-      account => 'devel-capside',
-      name => 'NAME'
-    ); } );
   
     mapping Map1 => {
       key1 => 'value1',
@@ -62,14 +46,6 @@ like($@, qr/Redeclared/, 'Stack with a duplicate mapping throws');
 eval {
   package TestClass3 {
     use CloudFormation::DSL;
-    use CCfnX::InstanceArgs;
-  
-    has params => (is => 'ro', isa => 'CCfnX::InstanceArgs', default => sub { CCfnX::InstanceArgs->new(
-      instance_type => 'x1.xlarge',
-      region => 'eu-west-1',
-      account => 'devel-capside',
-      name => 'NAME'
-    ); } );
   
     mapping Map1 => {
       key1 => 'value1',
