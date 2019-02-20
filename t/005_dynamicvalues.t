@@ -12,6 +12,8 @@ package TestClass {
   # So we can use Test::More in the dynamic values
   use Test::More;
 
+  parameter instance_type => 'String', { Default => 'x1.xlarge' };
+
   resource ELB => 'AWS::ElasticLoadBalancing::LoadBalancer', {
     AccessLoggingPolicy => {
       Enabled => 1,

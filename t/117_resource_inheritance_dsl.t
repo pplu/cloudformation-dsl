@@ -11,6 +11,8 @@ $Data::Dumper::Indent=1;
 package SuperClass {
   use CloudFormation::DSL;
 
+  parameter SG1 => 'String', { Default => 'sg-xxxxx' };
+
   resource SG => 'AWS::EC2::SecurityGroup', {
     VpcId => Ref('VPC'),
     GroupDescription => 'Original description',
@@ -23,6 +25,8 @@ package SuperClass {
 
 package SuperClassDynamicValue {
   use CloudFormation::DSL;
+
+  parameter SG1 => 'String', { Default => 'sg-xxxxx' };
 
   resource SG => 'AWS::EC2::SecurityGroup', {
     VpcId => Ref('VPC'),

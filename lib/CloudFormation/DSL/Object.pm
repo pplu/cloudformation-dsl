@@ -96,6 +96,10 @@ package CloudFormation::DSL::Object {
             $self->params->$parameter_name($value);
           }
         }
+      } elsif ($att->does('CloudFormation::DSL::AttributeTrait::Parameter')) {
+        if (not $att->does('CloudFormation::DSL::AttributeTrait::Attachable')) {
+          $self->params->$name($self->$name->Default) if (defined $self->$name->Default);
+        }
       }
     }
   }

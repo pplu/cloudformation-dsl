@@ -31,6 +31,8 @@ cmp_ok($obj->Resource('User')->DeletionPolicy, 'eq', 'Retain', 'DeletionPolicy i
 package TestClass2 {
   use CloudFormation::DSL;
 
+  parameter my_param => 'String', { Default => "true" };
+
   resource User => 'AWS::IAM::User', {
     Path => '/',
   }, {

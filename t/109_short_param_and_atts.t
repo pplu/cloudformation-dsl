@@ -13,6 +13,8 @@ package TestShortcutsInner {
 package TestShortcuts {
   use CloudFormation::DSL;
 
+  parameter xxx => 'Number', { Default => 99 };
+
   has att => (is => 'ro', isa => 'Str', default => 'Att Value');
 
   has att_object => (is => 'ro', default => sub { TestShortcutsInner->new });

@@ -8,7 +8,7 @@ package TestClass {
   use CloudFormation::DSL;
 
   parameter stack_param => 'String', { Required => 1  }, { InStack => 1 };
-  parameter instance_type => 'String', { Required => 1 };
+  parameter instance_type => 'String', { Default => 'x1.xlarge' };
 
   resource Instance => 'AWS::EC2::Instance', {
     ImageId => 'ami-XXXXXX', 
