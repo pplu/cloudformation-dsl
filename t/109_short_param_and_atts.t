@@ -5,15 +5,6 @@ use warnings;
 use Test::More;
 use Test::Exception;
 
-package TestShortcutsParams {
-  use Moose;
-  extends 'CCfnX::CommonArgs';
-  has '+region' => (default => 'eu-west-1');
-  has '+account' => (default => 'devel-capside');
-  has '+name' => (default => 'DefaultName');
-  has 'xxx' => (is => 'ro', isa => 'Str', default => 99);
-}
-
 package TestShortcutsInner {
   use Moose;
   has att => (is => 'ro', default => 'att inner value');
@@ -21,8 +12,6 @@ package TestShortcutsInner {
 
 package TestShortcuts {
   use CloudFormation::DSL;
-
-  has params => (is => 'ro', isa => 'TestShortcutsParams', default => sub { TestShortcutsParams->new });
 
   has att => (is => 'ro', isa => 'Str', default => 'Att Value');
 

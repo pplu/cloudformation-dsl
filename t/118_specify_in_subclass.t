@@ -5,23 +5,9 @@ use warnings;
 use Test::More;
 use Test::Exception;
 use Data::Dumper;
-$Data::Dumper::Indent=1;
-
-
-package SuperClassParams {
-  use Moose;
-  extends 'CCfnX::CommonArgs';
-  has '+region' => (default => 'eu-west-1');
-  has '+account' => (default => 'devel-capside');
-  has '+name' => (default => 'DefaultName');
-  has SG1 => (is => 'ro', isa => 'Str', default => 'sg-xxxxx');
-
-}
 
 package BaseClass {
   use CloudFormation::DSL;
-
-  has params => (is => 'ro', isa => 'SuperClassParams', default => sub { SuperClassParams->new() });
 
   resource Instance => 'AWS::EC2::Instance', {
     'ImageId' => SpecifyInSubClass,

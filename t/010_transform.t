@@ -10,13 +10,6 @@ use Test::More;
 
   package GlobalTransform {
     use CloudFormation::DSL;
-    use CCfnX::CommonArgs;
-
-    has params => ( is => 'ro', isa => 'CCfnX::CommonArgs', default => sub { CCfnX::CommonArgs->new( {
-            name    => 'GlobalTransform',
-            region  => 'eu-west-1',
-            account => 'test',
-    } ) } );
 
     transform 'MyTransform';
   }

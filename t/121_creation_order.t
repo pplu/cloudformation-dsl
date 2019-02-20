@@ -39,13 +39,6 @@ package Cfn::Resource::Type1 {
 
 package Test1 {
   use CloudFormation::DSL;
-  use CCfnX::CommonArgs;
-
-  has params => (is => 'ro', default => sub { CCfnX::CommonArgs->new(
-    name => 'test',
-    account => 'devel-capside',
-    region => 'eu-west-1',
-  ) });
 
   resource R1 => 'Type1', { }, { DependsOn => [ 'R2', 'R3' ] };
   resource R2 => 'Type1', { };

@@ -10,18 +10,8 @@ use Test::More;
 # fourth parameter) correctly to resources
 #
 
-package Params {
-  use Moose;
-  with 'MooseX::Getopt';
-
-  has my_param => (is => 'ro', default => "true");
-
-}
-
 package TestClass {
   use CloudFormation::DSL;
-
-  has params => (is => 'ro', isa => 'Params', default => sub { Params->new_with_options });
 
   resource User => 'AWS::IAM::User', {
     Path => '/',
@@ -40,8 +30,6 @@ cmp_ok($obj->Resource('User')->DeletionPolicy, 'eq', 'Retain', 'DeletionPolicy i
 
 package TestClass2 {
   use CloudFormation::DSL;
-
-  has params => (is => 'ro', isa => 'Params', default => sub { Params->new_with_options });
 
   resource User => 'AWS::IAM::User', {
     Path => '/',
@@ -74,8 +62,6 @@ cmp_ok(
 
 package TestClass3 {
   use CloudFormation::DSL;
-
-  has params => (is => 'ro', isa => 'Params', default => sub { Params->new_with_options });
 
   resource User => 'AWS::IAM::User', {
     Path => '/',

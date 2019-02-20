@@ -8,17 +8,9 @@ use Test::Exception;
 
 package TestClass {
   use CloudFormation::DSL;
-  use CCfnX::InstanceArgs;
   use CCfnX::DynamicValue;
   # So we can use Test::More in the dynamic values
   use Test::More;
-
-  has params => (is => 'ro', isa => 'CCfnX::InstanceArgs', default => sub { CCfnX::InstanceArgs->new(
-    instance_type => 'x1.xlarge',
-    region => 'eu-west-1',
-    account => 'devel-capside',
-    name => 'NAME'
-  ); } );
 
   resource ELB => 'AWS::ElasticLoadBalancing::LoadBalancer', {
     AccessLoggingPolicy => {
@@ -84,14 +76,6 @@ cmp_ok($obj->stash->{ akey }, 'eq', 'akeyValue', 'The stashed value is in the st
 
 package TestClass2 {
   use CloudFormation::DSL;
-  use CCfnX::InstanceArgs;
-
-  has params => (is => 'ro', isa => 'CCfnX::InstanceArgs', default => sub { CCfnX::InstanceArgs->new(
-    instance_type => 'x1.xlarge',
-    region => 'eu-west-1',
-    account => 'devel-capside',
-    name => 'NAME'
-  ); } );
 
   resource IAM => 'AWS::IAM::User', {
     Path => Cfn::DynamicValue->new(Value => sub {

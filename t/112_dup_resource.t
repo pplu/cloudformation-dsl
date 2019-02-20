@@ -10,17 +10,9 @@ use Test::Exception;
 # fourth parameter) correctly to resources
 #
 
-package Params {
-  use Moose;
-  use MooseX::Getopt;
-  with 'MooseX::Getopt';
-}
-
 dies_ok {
   package TestClass {
     use CloudFormation::DSL;
-  
-    has params => (is => 'ro', isa => 'Params', default => sub { Params->new_with_options });
   
     resource User => 'AWS::IAM::User', {
       Path => '/',
