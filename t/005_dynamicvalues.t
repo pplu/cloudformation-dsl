@@ -8,7 +8,6 @@ use Test::Exception;
 
 package TestClass {
   use CloudFormation::DSL;
-  use CCfnX::DynamicValue;
   # So we can use Test::More in the dynamic values
   use Test::More;
 
@@ -17,7 +16,7 @@ package TestClass {
   resource ELB => 'AWS::ElasticLoadBalancing::LoadBalancer', {
     AccessLoggingPolicy => {
       Enabled => 1,
-      S3BucketName => CCfnX::DynamicValue->new(Value => sub {
+      S3BucketName => Cfn::DynamicValue->new(Value => sub {
         isa_ok($_[0], 'TestClass', 'A DynamicValue inside a TypedValue recieves as first parameter a reference to the infrastructure');
         return 'the-bucket';
       }), 
@@ -35,10 +34,10 @@ package TestClass {
   };
 
   resource Instance => 'AWS::EC2::Instance', sub {
-    ImageId => CCfnX::DynamicValue->new(Value => sub { return 'DynamicValue' }),
+    ImageId => Cfn::DynamicValue->new(Value => sub { return 'DynamicValue' }),
     InstanceType => Parameter('instance_type'),
     SecurityGroups => [ 'sg-XXXXX' ],
-    AvailabilityZone => CCfnX::DynamicValue->new(Value => sub {
+    AvailabilityZone => Cfn::DynamicValue->new(Value => sub {
       isa_ok($_[0], 'TestClass', 'A DynamicValue recieves as first parameter a reference to the infrastructure');
       return 'eu-west-2'
     }),
@@ -46,13 +45,13 @@ package TestClass {
       'Fn::Base64' => {
         'Fn::Join' => [
           '', [
-            CCfnX::DynamicValue->new(Value => sub { return 'line 1' }),
-            CCfnX::DynamicValue->new(Value => sub { return 'line 2' }),
-            CCfnX::DynamicValue->new(Value => sub { 
-               CCfnX::DynamicValue->new(Value => sub { return 'dv in a dv' })
+            Cfn::DynamicValue->new(Value => sub { return 'line 1' }),
+            Cfn::DynamicValue->new(Value => sub { return 'line 2' }),
+            Cfn::DynamicValue->new(Value => sub { 
+               Cfn::DynamicValue->new(Value => sub { return 'dv in a dv' })
             }),
-            CCfnX::DynamicValue->new(Value => sub { 
-               return ('before dynamic', CCfnX::DynamicValue->new(Value => sub { return 'in middle' }), 'after dynamic');
+            Cfn::DynamicValue->new(Value => sub { 
+               return ('before dynamic', Cfn::DynamicValue->new(Value => sub { return 'in middle' }), 'after dynamic');
             }),
           ]
         ]
