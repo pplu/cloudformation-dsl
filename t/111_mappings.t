@@ -30,7 +30,6 @@ cmp_ok($struct->{Mappings}{Map2}{key2}, 'eq', 'value2', 'Got a value for a key o
 eval {
   package TestClass2 {
     use CloudFormation::DSL;
-    use CCfnX::InstanceArgs;
   
     mapping Map1 => {
       key1 => 'value1',

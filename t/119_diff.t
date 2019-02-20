@@ -79,13 +79,6 @@ package Test401::Stack7 {
   };
 }
 
-package Test401::Stack8Params {
-  use CCfnX::CommonArgs;
-  use Moose;
-  extends 'CCfnX::CommonArgs';
-  has dns_type => (is => 'ro', isa => 'Str', default => 'CNAME');
-}
-
 package Test401::Stack8 {
   use CloudFormation::DSL;
   

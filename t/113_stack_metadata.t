@@ -7,7 +7,6 @@ use Test::Exception;
 
 package TestClass {
   use CloudFormation::DSL;
-  use CCfnX::CommonArgs;
 
   # This is not known to be valid
   #metadata 'MyMDTest1', Ref('XXX');
