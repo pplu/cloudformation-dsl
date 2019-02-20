@@ -21,12 +21,6 @@ package CloudFormation::DSL::Object {
     does => 'CloudFormation::DSL::AttachmentResolver',
   );
 
-  sub resolve_attachment {
-    my ($self, $name, $type, $lookup_key) = @_;
-    die "Can't resolve attachments without an attachment_resolver" if (not defined $self->attachment_resolver);
-    return $self->attachment_resolver->resolve($name, $type, $lookup_key);
-  };
-
   has params => (
     is => 'ro',
     isa => 'ObjectifiedHash',
@@ -89,6 +83,14 @@ package CloudFormation::DSL::Object {
       } elsif ($att->does('CloudFormation::DSL::AttributeTrait::StackParameter')) {
         my $type = $att->type_constraint->name;
         $self->addParameter($name, _moose_to_cfn_class($type));
+      } elsif ($att->does('CloudFormation::DSL::AttributeTrait::Attachable')) {
+        die "Can't resolve attachments without an attachment_resolver" if (not defined $self->attachment_resolver);
+	foreach my $parameter_name (keys %{ $att->provides }) {
+          my $lookup_key = $att->provides->{ $parameter_name };
+	  my $type = $att->type;
+          my $value = $self->attachment_resolver->resolve($name, $type, $lookup_key);
+          $self->params->$parameter_name($value);
+        }
       }
     }
   }

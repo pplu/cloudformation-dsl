@@ -158,6 +158,29 @@ package CloudFormation::DSL {
     );
   }
 
+  sub _attachment_map {
+    my $provides = shift;
+    my @map;
+    foreach my $key (keys %$provides) {
+      my $info = {};
+
+      if (substr($key,0,1) eq '-'){
+        # Strip off the '-' in the attribute name
+        my $attribute_name = $key;
+	substr($attribute_name,0,1) = '';
+	$info->{ attribute_name } = $attribute_name;
+	$info->{ lookup_name } = $provides->{ $key };
+	$info->{ in_stack } = 0;
+      } else {
+	$info->{ attribute_name } = $key;
+	$info->{ lookup_name } = $provides->{ $key };
+	$info->{ in_stack } = 1;
+      }
+      push @map, $info;
+    }
+    return \@map;
+  }
+
   sub attachment {
     Moose->throw_error(
       'Usage: attachment \'name\' => \'type\', {provides_key => provides_value, ... }'
@@ -166,6 +189,9 @@ package CloudFormation::DSL {
 
     _throw_if_attribute_duplicate($meta, $name);
 
+    die "the provides parameter has to be a hashref" if (defined $provides and ref($provides) ne 'HASH');
+    my $attachment_map = _attachment_map($provides);
+
     # Add the attachment
     $meta->add_attribute(
       $name,
@@ -173,41 +199,21 @@ package CloudFormation::DSL {
       isa    => 'Str',
       type   => $type,
       traits => [ 'Parameter', 'Attachable' ],
-      generates_params => [ keys %$provides ],
+      generates_params => [ map { $_->{ attribute_name } } @$attachment_map ],
+      provides => { map { ($_->{ attribute_name } => $_->{ lookup_name }) } @$attachment_map },
     );
 
     # Every attachment will declare that it provides some extra parameters in the provides
     # these will be converted in attributes. If they start with "-", then they will not be
     # StackParameters, that is they will not be accessible in CF via a Ref.
-    foreach my $attribute (keys %$provides) {
-      my $lookup_in_attachment = $provides->{$attribute};
+    foreach my $parameter (@$attachment_map) {
+      _throw_if_attribute_duplicate($meta, $parameter->{ attribute_name });
 
-      if ($meta->find_attribute_by_name($attribute)) {
-          Moose->throw_error("An attribute with name $attribute already exists");
-      }
-
-      my @extra_traits = ('Parameter');
-      if (substr($attribute,0,1) eq '-'){
-        # Strip off the '-' in the attribute name
-        substr($attribute,0,1) = '';
+      if ($parameter->{ in_stack }) {
+        parameter($meta, $parameter->{ attribute_name }, 'String', {}, { InStack => 1 });
       } else {
-        push @extra_traits, 'StackParameter';
+        parameter($meta, $parameter->{ attribute_name }, 'String', {}, { });
       }
-
-      $meta->add_attribute(
-        $attribute,
-        is      => 'rw',
-        isa     => 'Cfn::DynamicValue',
-        lazy    => 1,
-        traits  => [ @extra_traits ],
-        default => sub {
-          my $cfn = $_[0];
-          return Cfn::DynamicValue->new(Value => sub {
-            my $self = shift;
-	    $cfn->resolve_attachment($name, $type, $lookup_in_attachment); 
-          });
-        },
-      );
     }
   }
 

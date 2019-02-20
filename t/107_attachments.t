@@ -13,7 +13,7 @@ throws_ok {
       att1 => 'value'
     };
   }
-} qr/already exists/, "Can't create args with two equal parameter names";
+} qr/Redeclared/, "Can't create args with two equal parameter names";
 
 package TestAttach {
   use CloudFormation::DSL;
@@ -29,12 +29,10 @@ package TestAttach {
   resource R2 => 'AWS::IAM::User', {
     Path => Parameter('IAMPathStatic'),
   };
-
 }
 
 {
-  my $arch = TestAttach->new();
-  throws_ok(sub { $arch->IAMPath->Value->($arch), 'eq', '/iampath/path1' },
+  throws_ok(sub { TestAttach->new },
 	    qr/Can\'t resolve attachments without an attachment_resolver/,
 	    'attachments aren\'t resolved without an attachment resolver',
   );
@@ -55,15 +53,24 @@ package TestAttachmentResolver {
 {
   my $arch = TestAttach->new(params => { Attachment => 'Stack1' }, attachment_resolver => TestAttachmentResolver->new);
   isa_ok($arch->IAMPath, 'Cfn::Parameter');
-  cmp_ok($arch->IAMPath->Value->($arch), 'eq', '/iampath/path1', 'Got the appropiate value returned from the IAMPath parameter');
+  cmp_ok($arch->params->IAMPath, 'eq', '/iampath/path1', 'Got the appropiate value returned from the IAMPath parameter');
 
-use Data::Dumper;
-print Dumper($arch->as_hashref);
-  #cmp_ok($params->Att->Value, 'eq', 'Manual Value', 'Can specify an argument from an attachment without specifying the attachment');
+  isa_ok($arch->IAMPathStatic, 'Cfn::Parameter');
+  cmp_ok($arch->params->IAMPathStatic, 'eq', '/iampath/path1', 'Got the appropiate value returned from the StaticIAMPath parameter');
+
   cmp_ok($arch->as_hashref->{Resources}{R2}{Properties}{Path}, 'eq', '/iampath/path1');
 }
 
+{
+  my $arch = TestAttach->new(params => { Attachment => 'Stack1', IAMPath => 'X', IAMPathStatic => 'Y' }, attachment_resolver => TestAttachmentResolver->new);
+  isa_ok($arch->IAMPath, 'Cfn::Parameter');
+  cmp_ok($arch->params->IAMPath, 'eq', 'X', 'Got the appropiate value returned from the IAMPath parameter');
 
+  isa_ok($arch->IAMPathStatic, 'Cfn::Parameter');
+  cmp_ok($arch->params->IAMPathStatic, 'eq', 'Y', 'Got the appropiate value returned from the StaticIAMPath parameter');
+
+  cmp_ok($arch->as_hashref->{Resources}{R2}{Properties}{Path}, 'eq', 'X');
+}
 
 throws_ok {
   package TestArgsWithDefault {
@@ -72,7 +79,7 @@ throws_ok {
       att1 => 'value',
     };
   }
-} qr/already exists/, "Can't create args with two equal parameter names";
+} qr/Redeclared/, "Can't create args with two equal parameter names";
 
 
 package TestAttachWithDefault {
