@@ -85,6 +85,8 @@ package CloudFormation::DSL::Object {
         $self->addParameter($name, _moose_to_cfn_class($type));
       } elsif ($att->does('CloudFormation::DSL::AttributeTrait::Attachable')) {
         die "Can't resolve attachments without an attachment_resolver" if (not defined $self->attachment_resolver);
+        $self->params->$name($att->attachment_properties->{ Default }) if (defined $att->attachment_properties->{ Default });
+
 	foreach my $parameter_name (keys %{ $att->provides }) {
           my $lookup_key = $att->provides->{ $parameter_name };
 	  my $type = $att->type;

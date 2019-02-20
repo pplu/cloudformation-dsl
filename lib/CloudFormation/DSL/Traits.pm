@@ -59,6 +59,7 @@ package CloudFormation::DSL::AttributeTrait::Attachable {
   has type => (is => 'ro', isa => 'Str', required => 1);
   has generates_params => (is => 'ro', isa => 'ArrayRef[Str]', required => 1);
   has provides => (is => 'ro', isa => 'HashRef', required => 1);
+  has attachment_properties => (is => 'ro', isa => 'HashRef', required => 1);
 }
 
 1;

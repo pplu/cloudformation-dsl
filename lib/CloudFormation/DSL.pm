@@ -183,14 +183,17 @@ package CloudFormation::DSL {
 
   sub attachment {
     Moose->throw_error(
-      'Usage: attachment \'name\' => \'type\', {provides_key => provides_value, ... }'
+      'Usage: attachment \'name\' => \'type\', {provides_key => provides_value, ... }[, { Default => \'...\' }]'
     ) if (@_ < 2);
-    my ($meta, $name, $type, $provides) = @_;
+    my ($meta, $name, $type, $provides, $attachment_properties) = @_;
 
     _throw_if_attribute_duplicate($meta, $name);
 
     die "the provides parameter has to be a hashref" if (defined $provides and ref($provides) ne 'HASH');
     my $attachment_map = _attachment_map($provides);
+
+    $attachment_properties = {} if (not defined $attachment_properties);
+    die "the attachment_properties has to be a hashref" if (ref($attachment_properties) ne 'HASH');
 
     # Add the attachment
     $meta->add_attribute(
@@ -201,6 +204,7 @@ package CloudFormation::DSL {
       traits => [ 'Parameter', 'Attachable' ],
       generates_params => [ map { $_->{ attribute_name } } @$attachment_map ],
       provides => { map { ($_->{ attribute_name } => $_->{ lookup_name }) } @$attachment_map },
+      attachment_properties => $attachment_properties,
     );
 
     # Every attachment will declare that it provides some extra parameters in the provides

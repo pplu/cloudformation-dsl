@@ -112,15 +112,18 @@ package TestAttachWithDefault {
   use CloudFormation::DSL;
 
   attachment Attachment => 'Test', {
-    Att => 'value' 
+    Att => 'iam_path',
+    -AttStatic => 'iam_path',
   }, {
     Default => 'SomeAttachedStack'
   };
 }
 
 {
-  my $t = TestAttachWithDefault->new();
-  cmp_ok($t->Attachment, 'eq', 'SomeAttachedStack', 'Can specify a default value for the attachment');
+  my $t = TestAttachWithDefault->new(attachment_resolver => TestAttachmentResolver->new, params => {});
+  cmp_ok($t->params->Attachment, 'eq', 'SomeAttachedStack', 'Can specify a default value for the attachment');
+  cmp_ok($t->params->Att, 'eq', '/iampath/path1', 'The provides is resolved too...');
+  cmp_ok($t->params->AttStatic, 'eq', '/iampath/path1', 'The provides is resolved too...');
 }
 
 done_testing;
