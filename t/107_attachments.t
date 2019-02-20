@@ -62,6 +62,7 @@ package TestAttachmentResolver {
 }
 
 {
+  # Testing if we can overwrite attachment values from params
   my $arch = TestAttach->new(params => { Attachment => 'Stack1', IAMPath => 'X', IAMPathStatic => 'Y' }, attachment_resolver => TestAttachmentResolver->new);
   isa_ok($arch->IAMPath, 'Cfn::Parameter');
   cmp_ok($arch->params->IAMPath, 'eq', 'X', 'Got the appropiate value returned from the IAMPath parameter');
@@ -69,17 +70,42 @@ package TestAttachmentResolver {
   isa_ok($arch->IAMPathStatic, 'Cfn::Parameter');
   cmp_ok($arch->params->IAMPathStatic, 'eq', 'Y', 'Got the appropiate value returned from the StaticIAMPath parameter');
 
-  cmp_ok($arch->as_hashref->{Resources}{R2}{Properties}{Path}, 'eq', 'X');
+  cmp_ok($arch->as_hashref->{Resources}{R2}{Properties}{Path}, 'eq', 'Y');
 }
 
 throws_ok {
-  package TestArgsWithDefault {
+  package Duplicateattachmentprovides1 {
     use CloudFormation::DSL;
-    attachment att1 => 'Test', {
-      att1 => 'value',
+    attachment Attachment => 'Test', {
+        att1  => 'value',
+      '-att1' => 'value',
     };
   }
-} qr/Redeclared/, "Can't create args with two equal parameter names";
+} qr/Redeclared/, "Can't create two provides with same name";
+
+throws_ok {
+  package Duplicateattachmentprovides2 {
+    use CloudFormation::DSL;
+    attachment Attachment => 'Test', {
+        att1  => 'value',
+    };
+    attachment Attachment2 => 'Test', {
+        att1  => 'value',
+    };
+  }
+} qr/Redeclared/, "Can't create two provides with same name on different attachments";
+
+throws_ok {
+  package Duplicateattachmentprovides3 {
+    use CloudFormation::DSL;
+    attachment Attachment => 'Test', {
+        att1  => 'value',
+    };
+    attachment Attachment => 'Test', {
+        att2  => 'value',
+    };
+  }
+} qr/Redeclared/, "Can't create two provides with same name on different attachments";
 
 
 package TestAttachWithDefault {

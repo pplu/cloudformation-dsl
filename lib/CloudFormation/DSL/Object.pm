@@ -88,8 +88,10 @@ package CloudFormation::DSL::Object {
 	foreach my $parameter_name (keys %{ $att->provides }) {
           my $lookup_key = $att->provides->{ $parameter_name };
 	  my $type = $att->type;
-          my $value = $self->attachment_resolver->resolve($name, $type, $lookup_key);
-          $self->params->$parameter_name($value);
+	  if (not defined $self->params->$parameter_name) {
+            my $value = $self->attachment_resolver->resolve($name, $type, $lookup_key);
+            $self->params->$parameter_name($value);
+          }
         }
       }
     }
