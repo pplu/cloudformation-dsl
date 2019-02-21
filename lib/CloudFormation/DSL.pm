@@ -653,3 +653,151 @@ package CloudFormation::DSL {
 
 }
 1;
+### main pod documentation begin ###
+
+=encoding UTF-8
+
+=head1 NAME
+
+CloudFormation::DSL - A Domain Specific Language for creating CloudFormation templates
+
+=head1 SYNOPSIS
+
+  package MyStack {
+    use CloudFormation::DSL;
+
+    resource Instance1 => 'AWS::EC2::Instance', {
+      ImageId => 'ami-12345',
+    };
+
+    output IP => GetAtt('Instance1', 'PublicIp');
+  }
+
+  my $s1 = MyStack->new;
+  say "Resource Count: " . $s1->ResourceCount;
+  print $s1->as_hashref;
+
+=head1 DESCRIPTION
+
+CloudFormation::DSL is a "framework" for writing CloudFormation in an easier fashion, with a more
+forgiving syntax than the standard JSON or YAML syntaxes that CloudFormation supports. It also
+eases authoring some complex CloudFormation patterns.
+
+You can think of it as a preprocessor that generates CloudFormation documents
+
+CloudFormation::DSL builds on the idea that the information in a CloudFormation template can be
+expressed as a class. After all, a class is a template for an object! Since we represent templates 
+as classes, we can instance those classes, manipulate and query them. An instance of a class has
+an C<as_json> method that once called generates the CloudFormation document that can be sent to
+the CloudFormation service.
+
+=head1 Writing a class
+
+Start your
+
+=head2 resource Name => 'TYPE', { ... Properties ... }[, { ... Resource Attributes ... }]
+
+=head2 output Name => ...;
+
+=head2 parameter Name => 'TYPE', { ... Properties ... }
+
+=head2 condition Name => ...;
+
+=head2 attachment 
+
+=head2 mapping
+
+=head2 metadata
+
+=head2 transform
+
+=head2 stack_version
+
+=head1 Shortcuts
+
+=head2 Ref('ResourceName')
+
+=head2 GetAtt('ResourceName', 'AttributeName')
+
+=head2 UserData($string)
+
+=head2 CfString($string)
+
+=head2 Parameter('ParameterName')
+
+=head2 Attribute('AttributeName')
+
+=head2 Json($json_string)
+
+=head2 Tag($key, $value)
+
+=head2 ELBListener($lbport, $lbprotocol[, $instance_port[, $instance_protocol]])
+
+=head2 TCPELBListener($lbport[, $instance_port])
+
+=head2 SGRule($port, $to, $desc)
+
+=head2 SGRule($port, $to, $proto, $desc)
+
+=head2 SGEgressRule
+
+=head2 SpecifyInSubClass
+
+=head1 Getting the most out of the DSL
+
+=head1 Inheritance
+
+You can use inheritance primitives to structure your infrastructure into reusable modules
+
+  package MyBaseClass {
+    use CloudFormation::DSL;
+
+    resource I1 => 'AWS::EC2::Instance', {
+      ImageId => SpecifyInSubClass,
+      SecurityGroups => [ Ref('SG' ],
+    };
+    resource SG => 'AWS::EC2::SecurityGroup, {
+      ...
+    };
+  }
+  package SubClass1 {
+    use CloudFormation::DSL;
+    extends 'MyBaseClass';
+    resource I1 => 'AWS::IAM::User', {
+      ImageId => 'ami-XXXX',
+    };
+  }
+
+=head1 Attachments
+
+
+=head1 SEE ALSO
+
+L<Cfn>
+
+L<https://docs.aws.amazon.com/es_es/AWSCloudFormation/latest/UserGuide/Welcome.html>
+
+=head1 AUTHOR
+
+    Jose Luis Martinez
+    CAPSiDE
+    jlmartinez@capside.com
+
+=head1 Contributions
+
+Thanks to Sergi Pruneda, Miquel Ruiz, Luis Alberto Gimenez, Eleatzar Colomer, Oriol Soriano, 
+Roi Vazquez for years of work on this module.
+
+=head1 BUGS and SOURCE
+
+The source code is located here: L<https://github.com/pplu/cloudformation-dsl>
+
+Please report bugs to: L<https://github.com/pplu/cfn-perl/cloudformation-dsl>
+
+=head1 COPYRIGHT and LICENSE
+
+Copyright (c) 2013 by CAPSiDE
+This code is distributed under the Apache 2 License. The full text of the 
+license can be found in the LICENSE file included with this module.
+
+=cut
