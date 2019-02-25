@@ -4,8 +4,6 @@ requires 'Cfn';
 requires 'Sort::Topological';
 requires 'Regexp::Common';
 requires 'Hash::Merge';
-requires 'DateTime::Format::Strptime';
-requires 'LWP::Simple';
 requires 'JSON::MaybeXS';
 requires 'Hash::AsObject';
 

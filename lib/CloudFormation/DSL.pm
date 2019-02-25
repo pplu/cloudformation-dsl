@@ -13,10 +13,8 @@ package CloudFormation::DSL {
   use CCfnX::DSL::Inheritance;
   use CloudFormation::DSL::Object;
   use Regexp::Common qw(net);
-  use LWP::Simple;
   use JSON::MaybeXS;
   use Scalar::Util qw(looks_like_number blessed);
-  use DateTime::Format::Strptime qw( );
 
   our $ubuntu_release_table_url = 'https://cloud-images.ubuntu.com/locator/ec2/releasesTable';
 
@@ -25,7 +23,7 @@ package CloudFormation::DSL {
                    'mapping', 'metadata', 'stack_version', 'transform' ],
     as_is => [ qw/Ref ConditionRef GetAtt UserData CfString Parameter Attribute Json
                 Tag ELBListener TCPELBListener SGRule SGEgressRule 
-                GetASGStatus GetInstanceStatus FindUbuntuImage FindBaseImage SpecifyInSubClass/ ],
+                SpecifyInSubClass/ ],
     also  => 'Moose',
   );
 
@@ -551,84 +549,6 @@ package CloudFormation::DSL {
     return $rule;
   }
 
-  sub _extract_ami_from_uri {
-      my $uri = shift || confess "Need URI";
-
-      $uri =~ m{<a.*href.*>([\s\S]+?)</a>};
-      return $1;
-  }
-
-  # NOTE: Only hvm:ebs-ssd supported!
-  sub FindUbuntuImage {
-      my $region = shift || confess "Need Region";
-      my $version = shift || confess "Need Version";
-
-      my $raw = get $ubuntu_release_table_url;
-      die "Could not get Ubuntu release information" unless defined $raw;
-
-      my $json = JSON->new->utf8->relaxed(1);
-      my $info = $json->decode($raw)->{aaData};
-      my @h = map {
-        _extract_ami_from_uri($_->[6])
-      } grep {
-            $_->[0] eq $region &&
-            $_->[1] eq $version &&
-            $_->[3] eq 'amd64' &&
-            $_->[4] eq 'hvm:ebs-ssd'
-      } @$info;
-
-      if (scalar @h > 1) {
-          confess "Got more than a single AMI!";
-      } elsif (scalar @h == 0) {
-          confess "Did not find an image for '$version' in region '$region'";
-      }
-
-      return shift @h;
-
-  }
-
-  sub FindBaseImage {
-    my $region  = shift;
-    my @filters = @_;
-
-    my @describe_images_filter = map {
-      my ( $name, $value ) = split( '=', $_ );
-      { Name => $name, Values => [$value] };
-    } @filters;
-
-    my $ec2 = Paws->service( 'EC2', region => $region );
-    my @amis = @{ $ec2->DescribeImages(
-        Filters => \@describe_images_filter,
-    )->Images };
-
-    # print "\n\n Unsorted list of amis: \n";
-    # foreach my $ami (@amis) { printf( "%s - %s\n", $ami->ImageId, $ami->CreationDate ) }
-
-    my @sorted_amis = sort {
-
-      my $format = DateTime::Format::Strptime->new(
-        pattern   => '%Y-%m-%dT%T',
-        time_zone => 'UTC',
-        on_error  => 'croak',
-        strict    => 1,
-      );
-      my $dta = $format->parse_datetime( $a->CreationDate );
-      my $dtb = $format->parse_datetime( $b->CreationDate );
-
-      # Reversed sort so the latest one ends up in position 0
-      $dtb <=> $dta
-    } @amis;
-
-    # print "\n\n Sorted list of amis: \n";
-    # foreach my $ami (@sorted_amis) { printf( "%s - %s\n", $ami->ImageId, $ami->CreationDate ) }
-
-    my $ami = $sorted_amis[0];
-
-    die "FindBaseImage: Couldn't find any image that match the specified filters\n" if not defined $ami;
-    warn sprintf( "FindBaseImage: using '%s' with ID '%s' as the base image (created at %s)\n", $ami->Name, $ami->ImageId, $ami->CreationDate );
-    return $ami->ImageId;
-  }
-
   sub UserData {
     my @args = @_;
     return Cfn::DynamicValue->new(Value => sub {
@@ -643,12 +563,6 @@ package CloudFormation::DSL {
       my @ctx = @_;
       CCfnX::UserData->new(text => $string)->as_hashref_joins(@ctx);
     });
-  }
-
-  sub GetASGStatus {
-  }
-
-  sub GetInstanceStatus {
   }
 
 }
