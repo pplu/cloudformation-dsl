@@ -1,5 +1,5 @@
 requires 'Moose';
-requires 'Cfn';
+requires 'Cfn', '>= 0.02';
 requires 'Sort::Topological';
 requires 'Regexp::Common';
 requires 'Hash::Merge';
