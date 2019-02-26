@@ -5,6 +5,7 @@ use warnings;
 use Data::Printer;
 use Test::More;
 use Test::Exception;
+use Cfn::Diff;
 
 package TestClass {
   use CloudFormation::DSL;
@@ -98,6 +99,54 @@ package TestClass2 {
 {
   my $o = TestClass2->new;
   throws_ok(sub { $o->as_hashref }, qr/already in the stash/);
+}
+
+{
+  my $left = TestClass->new;
+  my $right = TestClass2->new;
+  my $diff = Cfn::Diff->new(left => $left, right => $right);
+  $diff->diff;
+  cmp_ok(scalar(@{ $diff->changes }), '==', 4, '');
+}
+
+package TestClass3 {
+  use CloudFormation::DSL;
+
+  resource IAM => 'AWS::IAM::User', {
+    Path => Cfn::DynamicValue->new(Value => sub {
+      my $self = shift;
+      return '/';
+    })
+  };
+}
+
+package TestClass4 {
+  use CloudFormation::DSL;
+
+  resource IAM => 'AWS::IAM::User', {
+    Path => Cfn::DynamicValue->new(Value => sub {
+      my $self = shift;
+      return '/2';
+    })
+  };
+}
+
+{
+  my $diff = Cfn::Diff->new(left => TestClass3->new, right => TestClass4->new);
+  $diff->diff;
+  cmp_ok(scalar(@{ $diff->changes }), '==', 1, '');
+  isa_ok($diff->changes->[0]->from, 'Cfn::DynamicValue');
+  isa_ok($diff->changes->[0]->to,   'Cfn::DynamicValue');
+}
+
+{
+  my $diff = Cfn::Diff->new(left => TestClass3->new, right => TestClass4->new, resolve_dynamicvalues => 1);
+  $diff->diff;
+  cmp_ok(scalar(@{ $diff->changes }), '==', 1, '');
+  isa_ok($diff->changes->[0]->from, 'Cfn::String');
+  isa_ok($diff->changes->[0]->to,   'Cfn::String');
+  cmp_ok($diff->changes->[0]->from->Value, 'eq', '/');
+  cmp_ok($diff->changes->[0]->to->Value, 'eq', '/2');
 }
 
 done_testing;

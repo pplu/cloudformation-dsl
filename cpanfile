@@ -1,6 +1,6 @@
 requires 'Moose';
 requires 'MooseX::Getopt';
-requires 'Cfn';
+requires 'Cfn', '>= 0.02';
 requires 'Sort::Topological';
 requires 'Regexp::Common';
 requires 'Hash::Merge';
