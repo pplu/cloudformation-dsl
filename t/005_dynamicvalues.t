@@ -105,7 +105,6 @@ package TestClass2 {
   my $left = TestClass->new;
   my $right = TestClass2->new;
   my $diff = Cfn::Diff->new(left => $left, right => $right);
-  $diff->diff;
   cmp_ok(scalar(@{ $diff->changes }), '==', 4, '');
 }
 
@@ -133,7 +132,6 @@ package TestClass4 {
 
 {
   my $diff = Cfn::Diff->new(left => TestClass3->new, right => TestClass4->new);
-  $diff->diff;
   cmp_ok(scalar(@{ $diff->changes }), '==', 1, '');
   isa_ok($diff->changes->[0]->from, 'Cfn::DynamicValue');
   isa_ok($diff->changes->[0]->to,   'Cfn::DynamicValue');
@@ -141,7 +139,6 @@ package TestClass4 {
 
 {
   my $diff = Cfn::Diff->new(left => TestClass3->new, right => TestClass4->new, resolve_dynamicvalues => 1);
-  $diff->diff;
   cmp_ok(scalar(@{ $diff->changes }), '==', 1, '');
   isa_ok($diff->changes->[0]->from, 'Cfn::String');
   isa_ok($diff->changes->[0]->to,   'Cfn::String');
