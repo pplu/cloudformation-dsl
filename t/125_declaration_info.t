@@ -123,6 +123,29 @@ package TestClass {
     }
   );
 }
- 
+
+package TestSubClass {
+  use CloudFormation::DSL;
+  extends 'TestClass';
+
+  resource R2 => 'AWS::IAM::User', {
+    Path => '/'
+  };
+}
+
+{
+  my $p = TestSubClass->new(attachment_resolver => AttachmentResolver->new);
+  is_deeply(
+    $p->declaration_info('R2'),
+    {
+      'type' => 'DSL',
+      'file' => 't/125_declaration_info.t',
+      'line' => 131,
+      'context' => 'resource declaration',
+      'package' => 'TestSubClass'
+    }
+  );
+}
+
 done_testing; 
 
