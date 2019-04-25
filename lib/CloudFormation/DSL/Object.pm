@@ -45,7 +45,7 @@ package CloudFormation::DSL::Object {
   # Helper to safely add things to stash
   sub add_to_stash {
     my ($self, $name, $value) = @_;
-    die "An element is already in the stash with name $name" if (exists $self->stash->{$name});
+    Moose->throw_error("An element is already in the stash with name $name") if (exists $self->stash->{$name});
     $self->stash->{ $name } = $value;
   }
 
