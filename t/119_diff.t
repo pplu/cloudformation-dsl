@@ -227,6 +227,7 @@ my $withoutprops = '{"Resources" : {"IAMUser" : {"Type" : "AWS::IAM::User"} }}';
     left => Cfn->from_json($withoutprops),
     right => Cfn->from_json($withoutprops)
   );
+  cmp_ok(scalar(@{ $diff->changes }), '==', 0, 'got no changes');
 }
 
 done_testing;
