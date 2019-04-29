@@ -10,7 +10,7 @@ package CloudFormation::DSL {
 
   use Carp;
   use CCfnX::UserData;
-  use CCfnX::DSL::Inheritance;
+  use CloudFormation::DSL::Inheritance;
   use CloudFormation::DSL::Object;
   use Regexp::Common qw(net);
   use LWP::Simple;

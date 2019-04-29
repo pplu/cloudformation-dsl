@@ -1,4 +1,4 @@
-package CCfnX::DSL::Inheritance {
+package CloudFormation::DSL::Inheritance {
   use Moose;
   use Hash::Merge qw/merge _merge_hashes/;
 
