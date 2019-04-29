@@ -49,6 +49,14 @@ package CloudFormation::DSL::Object {
     $self->stash->{ $name } = $value;
   }
 
+  sub declaration_info {
+    my ($self, $attribute) = @_;
+
+    my $att = $self->meta->find_attribute_by_name($attribute);
+    die "Can't find attribute $attribute" if (not defined $att);
+    return $att->{ definition_context } // {};
+  }
+
   # Small helper to map a Moose class (parameters have a type) to a CloudFormation type
   sub _moose_to_cfn_class {
     return {  
@@ -85,7 +93,7 @@ package CloudFormation::DSL::Object {
         my $type = $att->type_constraint->name;
         $self->addParameter($name, _moose_to_cfn_class($type));
       } elsif ($att->does('CloudFormation::DSL::AttributeTrait::Attachable')) {
-        die "Can't resolve attachments without an attachment_resolver" if (not defined $self->attachment_resolver);
+	Moose->throw_error("Can't resolve attachments without an attachment_resolver") if (not defined $self->attachment_resolver);
         $self->params->$name($att->attachment_properties->{ Default }) if (defined $att->attachment_properties->{ Default });
 
 	foreach my $parameter_name (keys %{ $att->provides }) {

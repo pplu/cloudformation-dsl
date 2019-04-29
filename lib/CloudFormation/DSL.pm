@@ -45,6 +45,14 @@ package CloudFormation::DSL {
     }
   }
 
+  sub _get_definition_context {
+    my $where = shift;
+    my %context = Moose::Util::_caller_info(2);
+    $context{context} = "$where declaration";
+    $context{type} = 'DSL';
+    return \%context;
+  }
+
   sub transform {
     Moose->throw_error('Usage: transform name1, name2, ... , nameN;')
         if ( @_ < 1 );
@@ -79,6 +87,7 @@ package CloudFormation::DSL {
       traits => [ 'Condition' ],
       lazy => 1,
       coerce => 1,
+      definition_context => _get_definition_context('condition'),
       default => sub {
         $condition;
       },
@@ -123,6 +132,7 @@ package CloudFormation::DSL {
       traits => [ 'Resource' ],
       lazy => 1,
       default => $default_coderef,
+      definition_context => _get_definition_context('resource'),
     );
   }
 
@@ -155,6 +165,7 @@ package CloudFormation::DSL {
           %args,
         });
       },
+      definition_context => _get_definition_context('parameter'),
     );
   }
 
@@ -202,6 +213,7 @@ package CloudFormation::DSL {
       isa    => 'Str',
       type   => $type,
       traits => [ 'Parameter', 'Attachable' ],
+      definition_context => _get_definition_context('attachment'),
       generates_params => [ map { $_->{ attribute_name } } @$attachment_map ],
       provides => { map { ($_->{ attribute_name } => $_->{ lookup_name }) } @$attachment_map },
       attachment_properties => $attachment_properties,
@@ -238,6 +250,7 @@ package CloudFormation::DSL {
         coerce => 1,
         traits => [ 'Output', 'PostOutput' ],
         lazy => 1,
+        definition_context => _get_definition_context('output'),
         default => sub {
           return Moose::Util::TypeConstraints::find_type_constraint('Cfn::Output')->coerce({
             Value => $options,
@@ -253,6 +266,7 @@ package CloudFormation::DSL {
         coerce => 1,
         traits => [ 'Output' ],
         lazy => 1,
+        definition_context => _get_definition_context('output'),
         default => sub {
           return Moose::Util::TypeConstraints::find_type_constraint('Cfn::Output')->coerce({
             Value => $options,
@@ -283,6 +297,7 @@ package CloudFormation::DSL {
       isa => 'Cfn::Mapping',
       traits => [ 'Mapping' ],
       lazy => 1,
+      definition_context => _get_definition_context('mapping'),
       default => sub {
         return Moose::Util::TypeConstraints::find_type_constraint('Cfn::Mapping')->coerce({ %args });
       },
@@ -304,6 +319,7 @@ package CloudFormation::DSL {
         coerce => 1,
         traits => [ 'Metadata' ],
         lazy => 1,
+        definition_context => _get_definition_context('metadata'),
         default => sub {
           return Moose::Util::TypeConstraints::find_type_constraint('Cfn::Value')->coerce(@options);
         },
@@ -316,6 +332,7 @@ package CloudFormation::DSL {
         coerce => 1,
         traits => [ 'Metadata' ],
         lazy => 1,
+        definition_context => _get_definition_context('metadata'),
         default => sub {
           return Moose::Util::TypeConstraints::find_type_constraint('Cfn::Value')->coerce(@options);
         },
@@ -339,6 +356,7 @@ package CloudFormation::DSL {
       coerce => 1,
       traits => [ 'Metadata' ],
       lazy => 1,
+      definition_context => _get_definition_context('stack_version'),
       default => sub { return $version },
     );
   }
