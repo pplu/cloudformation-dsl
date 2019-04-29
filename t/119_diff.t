@@ -119,19 +119,16 @@ package Test401::Stack10 {
 
 {
   my $diff = Cfn::Diff->new(left => Test401::Stack1->new, right => Test401::Stack1->new);
-  $diff->diff;
   cmp_ok(scalar(@{ $diff->changes }), '==', 0, 'No changes for same stack');
 }
 
 {
   my $diff = Cfn::Diff->new(left => Test401::Stack1->new, right => Test401::Stack2->new);
-  $diff->diff;
   cmp_ok(scalar(@{ $diff->changes }), '==', 2, '2 changes: 1 res added, 1 deleted');
 }
 
 {
   my $diff = Cfn::Diff->new(left => Test401::Stack1->new, right => Test401::Stack3->new);
-  $diff->diff;
   cmp_ok(scalar(@{ $diff->changes }), '==', 1, '1 change: changed ImageId (Stack1 Vs Stack3)');
   isa_ok($diff->changes->[0], 'Cfn::Diff::ResourcePropertyChange','Got a ResourcePropertyChange');
   cmp_ok($diff->changes->[0]->mutability, 'eq', 'Immutable', 'ImageId prop is Immutable');
@@ -139,49 +136,41 @@ package Test401::Stack10 {
 
 {
   my $diff = Cfn::Diff->new(left => Test401::Stack3->new, right => Test401::Stack1->new);
-  $diff->diff;
   cmp_ok(scalar(@{ $diff->changes }), '==', 1, '1 change: changed ImageId (Stack3 vs Stack1)');
 }
 
 {
   my $diff = Cfn::Diff->new(left => Test401::Stack1->new, right => Test401::Stack4->new);
-  $diff->diff;
   cmp_ok(scalar(@{ $diff->changes }), '==', 2, '2 changes: 2 props changed');
 }
 
 {
   my $diff = Cfn::Diff->new(left => Test401::Stack4->new, right => Test401::Stack5->new);
-  $diff->diff;
   cmp_ok(scalar(@{ $diff->changes }), '==', 0, 'No changes');
 }
 
 {
   my $diff = Cfn::Diff->new(left => Test401::Stack7->new, right => Test401::Stack7->new);
-  $diff->diff;
   cmp_ok(scalar(@{ $diff->changes }), '==', 0, 'No changes');
 }
 
 {
   my $diff = Cfn::Diff->new(left => Test401::Stack5->new, right => Test401::Stack6->new);
-  $diff->diff;
   cmp_ok(scalar(@{ $diff->changes }), '==', 1, '1 prop changed from Primitive to Ref');
 }
 
 {
   my $diff = Cfn::Diff->new(left => Test401::Stack7->new, right => Test401::Stack8->new);
-  $diff->diff;
   cmp_ok(scalar(@{ $diff->changes }), '==', 1, '1 props changed from hardcoded value to DynamicValue');
 }
 
 {
   my $diff = Cfn::Diff->new(left => Test401::Stack8->new, right => Test401::Stack7->new);
-  $diff->diff;
   cmp_ok(scalar(@{ $diff->changes }), '==', 1, '1 props changed from DynamicValue to hardcoded value');
 }
 
 {
   my $diff = Cfn::Diff->new(left => Test401::Stack9->new, right => Test401::Stack9->new);
-  $diff->diff;
   cmp_ok(scalar(@{ $diff->changes }), '==', 0, 'Custom resources are diffable');
 }
 
@@ -192,21 +181,18 @@ package Test401::Stack10 {
   $right->cfn_options->custom_resource_rename(1);
 
   my $diff = Cfn::Diff->new(left => $left, right => $right);
-  $diff->diff;
   cmp_ok(scalar(@{ $diff->changes }), '==', 1, 'prop change in a custom resource');
   isa_ok($diff->changes->[0], 'Cfn::Diff::ResourcePropertyChange', 'Got a property change in a custom resource');
 }
 
 {
   my $diff = Cfn::Diff->new(left => Test401::Stack10->new, right => Test401::Stack9->new);
-  $diff->diff;
   cmp_ok(scalar(@{ $diff->changes }), '==', 1, 'prop change in a custom resource');
   isa_ok($diff->changes->[0], 'Cfn::Diff::ResourcePropertyChange', 'Got a property change in a custom resource');
 }
 
 {
   my $diff = Cfn::Diff->new(left => Test401::Stack1->new, right => Test401::Stack1ChangeR1->new);
-  $diff->diff;
   cmp_ok(scalar(@{ $diff->changes }), '==', 1, 'Resource type change detected');
   isa_ok($diff->changes->[0], 'Cfn::Diff::IncompatibleChange', 'Got an incompatible change');
 }
@@ -219,7 +205,6 @@ my $withoutprops = '{"Resources" : {"IAMUser" : {"Type" : "AWS::IAM::User"} }}';
     left => Cfn->from_json($withprops),
     right => Cfn->from_json($withoutprops)
   );
-  $diff->diff;
   cmp_ok(scalar(@{ $diff->changes }), '==', 1, 'got one change');
   isa_ok($diff->changes->[0], 'Cfn::Diff::Changes','Got a generic Change object');
   cmp_ok($diff->changes->[0]->path, 'eq', 'Resources.IAMUser', 'path ok');
@@ -231,7 +216,6 @@ my $withoutprops = '{"Resources" : {"IAMUser" : {"Type" : "AWS::IAM::User"} }}';
     left => Cfn->from_json($withoutprops),
     right => Cfn->from_json($withprops)
   );
-  $diff->diff;
   cmp_ok(scalar(@{ $diff->changes }), '==', 1, 'got one change');
   isa_ok($diff->changes->[0], 'Cfn::Diff::Changes','Got a generic Change object');
   cmp_ok($diff->changes->[0]->path, 'eq', 'Resources.IAMUser', 'path ok');
@@ -243,7 +227,6 @@ my $withoutprops = '{"Resources" : {"IAMUser" : {"Type" : "AWS::IAM::User"} }}';
     left => Cfn->from_json($withoutprops),
     right => Cfn->from_json($withoutprops)
   );
-  $diff->diff;
   cmp_ok(scalar(@{ $diff->changes }), '==', 0, 'got no changes');
 }
 
