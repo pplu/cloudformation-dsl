@@ -131,6 +131,10 @@ package TestSubClass {
   resource R2 => 'AWS::IAM::User', {
     Path => '/'
   };
+
+  resource '+R1' => 'AWS::IAM::User', {
+    '+Path' => 'XXX',
+  };
 }
 
 {
@@ -141,6 +145,16 @@ package TestSubClass {
       'type' => 'DSL',
       'file' => 't/125_declaration_info.t',
       'line' => 131,
+      'context' => 'resource declaration',
+      'package' => 'TestSubClass'
+    }
+  );
+  is_deeply(
+    $p->declaration_info('R1'),
+    {
+      'type' => 'DSL',
+      'file' => 't/125_declaration_info.t',
+      'line' => 135,
       'context' => 'resource declaration',
       'package' => 'TestSubClass'
     }
