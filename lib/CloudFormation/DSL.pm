@@ -9,7 +9,7 @@ package CloudFormation::DSL {
   # ABSTRACT: A DSL for building CloudFormation templates
 
   use Carp;
-  use CCfnX::UserData;
+  use CloudFormation::DSL::UserData;
   use CCfnX::DSL::Inheritance;
   use CloudFormation::DSL::Object;
   use Regexp::Common qw(net);
@@ -651,7 +651,7 @@ package CloudFormation::DSL {
     my @args = @_;
     return Cfn::DynamicValue->new(Value => sub {
       my @ctx = @_;
-      CCfnX::UserData->new(text => $args[0])->as_hashref(@ctx);
+      CloudFormation::DSL::UserData->new(text => $args[0])->as_hashref(@ctx);
     });
   }
 
@@ -659,7 +659,7 @@ package CloudFormation::DSL {
     my $string = shift;
     return Cfn::DynamicValue->new(Value => sub {
       my @ctx = @_;
-      CCfnX::UserData->new(text => $string)->as_hashref_joins(@ctx);
+      CloudFormation::DSL::UserData->new(text => $string)->as_hashref_joins(@ctx);
     });
   }
 

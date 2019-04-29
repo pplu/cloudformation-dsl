@@ -1,4 +1,4 @@
-package CCfnX::UserData {
+package CloudFormation::DSL::UserData {
   use Moose;
   use Cfn;
 
