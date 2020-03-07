@@ -20,14 +20,20 @@ package CloudFormation::DSL {
 
   our $ubuntu_release_table_url = 'https://cloud-images.ubuntu.com/locator/ec2/releasesTable';
 
-  Moose::Exporter->setup_import_methods(
-    with_meta => [ 'parameter', 'attachment', 'resource', 'output', 'condition', 
-                   'mapping', 'metadata', 'stack_version', 'transform' ],
-    as_is => [ qw/Ref ConditionRef GetAtt UserData CfString Parameter Attribute Json
-                Tag ELBListener TCPELBListener SGRule SGEgressRule 
-                GetASGStatus GetInstanceStatus FindUbuntuImage FindBaseImage SpecifyInSubClass/ ],
-    also  => 'Moose',
-  );
+  # import method is used to export functions provided by
+  # packages that doesn't uses Moose::Exporter 
+  sub import {
+    my ($import) = Moose::Exporter->build_import_methods(
+      install => [ 'unimport' ],
+      with_meta => [ 'parameter', 'attachment', 'resource', 'output', 'condition', 
+                    'mapping', 'metadata', 'stack_version', 'transform' ],
+      as_is => [ qw/Ref ConditionRef GetAtt UserData CfString Parameter Attribute Json
+                  Tag ELBListener TCPELBListener SGRule SGEgressRule 
+                  GetASGStatus GetInstanceStatus FindUbuntuImage FindBaseImage SpecifyInSubClass/ ],
+      also  => 'Moose',
+    );
+    goto &$import;
+  }
 
   # init_meta is used to make whoever uses CloudFormation::DSL to be a subclass
   # of CloudFormation::DSL::Object
