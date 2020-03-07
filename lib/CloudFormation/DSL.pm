@@ -4,6 +4,7 @@ package CloudFormation::DSL {
   use Moose ();
   use Moose::Exporter;
   use Moose::Util::MetaRole ();
+  use namespace::autoclean ();
 
   our $VERSION = '0.01';
   # ABSTRACT: A DSL for building CloudFormation templates
@@ -32,6 +33,10 @@ package CloudFormation::DSL {
                   GetASGStatus GetInstanceStatus FindUbuntuImage FindBaseImage SpecifyInSubClass/ ],
       also  => 'Moose',
     );
+    namespace::autoclean->import(
+      -cleanee => scalar(caller),
+    );
+
     goto &$import;
   }
 
