@@ -110,6 +110,8 @@ package CloudFormation::DSL::Object {
         }
       }
     }
+
+    $class_meta->make_immutable
   }
 
   sub get_stackversion_from_metadata {
