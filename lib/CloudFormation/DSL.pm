@@ -4,6 +4,7 @@ package CloudFormation::DSL {
   use Moose ();
   use Moose::Exporter;
   use Moose::Util::MetaRole ();
+  use true ();
 
   our $VERSION = '0.01';
   # ABSTRACT: A DSL for building CloudFormation templates
@@ -32,6 +33,8 @@ package CloudFormation::DSL {
                   GetASGStatus GetInstanceStatus FindUbuntuImage FindBaseImage SpecifyInSubClass/ ],
       also  => 'Moose',
     );
+    true->import();
+
     goto &$import;
   }
 
