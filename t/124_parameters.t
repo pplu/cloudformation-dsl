@@ -153,5 +153,36 @@ package TestClass4 {
   is($param3->Default, '40', "The attribute 'Param3' has a property 'Default'");
 }
  
+
+package TestClass4Partial {
+  use CloudFormation::DSL;
+  extends 'TestClass4Base';
+
+  parameter '+Param2' => 'Number', {
+    '+MaxLength'   => 12,
+  };
+
+}
+
+{
+  my $c1 = TestClass4Partial->new;
+
+  # same tests as TestClass4Base for Param1 (since it doesn't get overwritten)
+  my $param1 = $c1->Param1;
+  isa_ok($param1, 'Cfn::Parameter');
+  is($param1->Type, 'String', "The attribute 'Param1' has a property 'Type' (set by 'parameter' function of 'CCfnX::Shortcuts')"); 
+  is($param1->Default, 'param1 default', "The attribute 'Param1' has a property 'Default'");
+  is($param1->MaxLength, 30, "The attribute 'Param1' has a property 'MaxLength'");
+  is($param1->Description, 'Param1 Description', "The attribute 'Param1' has a property 'Description'");
+
+  # Test overwritten parameters
+  my $param2 = $c1->Param2;
+  isa_ok($param2, 'Cfn::Parameter');
+  is($param2->Type, 'Number', "The attribute 'Param2' has a property 'Type' (set by 'parameter' function of 'CCfnX::Shortcuts')"); 
+  is($param2->MaxLength, 12, "The attribute 'Param2' has a property 'MaxLength'");
+  is($param2->Default, 'this is the default value', "The attribute 'Param2' has a property 'Default'");
+  is($param2->Description, 'Param2 Description', "The attribute 'Param2' has a property 'Description'");
+
+}
 done_testing; 
 
