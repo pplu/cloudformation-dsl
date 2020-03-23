@@ -5,6 +5,7 @@ package CloudFormation::DSL {
   use Moose::Exporter;
   use Moose::Util::MetaRole ();
   use namespace::autoclean ();
+  use true ();
 
   our $VERSION = '0.01';
   # ABSTRACT: A DSL for building CloudFormation templates
@@ -36,6 +37,7 @@ package CloudFormation::DSL {
     namespace::autoclean->import(
       -cleanee => scalar(caller),
     );
+    true->import();
 
     goto &$import;
   }

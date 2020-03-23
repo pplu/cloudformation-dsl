@@ -7,6 +7,7 @@ requires 'DateTime::Format::Strptime';
 requires 'LWP::Simple';
 requires 'JSON::MaybeXS';
 requires 'Hash::AsObject';
+requires 'true';
 
 on test => sub {
   requires 'Test::More';
