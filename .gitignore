@@ -1,3 +1,4 @@
 cpanfile.snapshot
 local/
 dzil-local/
+CloudFormation-DSL-*
