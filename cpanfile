@@ -15,4 +15,5 @@ on test => sub {
   requires 'Data::Printer';
   requires 'Test::Trap';
   requires 'Test::File::Contents';
+  requires 'Test::Pod';
 };
