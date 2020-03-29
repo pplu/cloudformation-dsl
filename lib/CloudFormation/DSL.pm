@@ -1014,7 +1014,7 @@ C<ELBListener(80, 'HTTP')> will forward traffic from port 80 of the ELB to port 
 C<ELBListener(80, 'HTTP', 3000)> will forward traffic from port 80 of the ELB to port 3000 on the 
 backends
 
-C<ELBListener(443, 'HTTPS', 5000, 'HTTP') will do SSL offloading on the ELB, forwarding to port 
+C<ELBListener(443, 'HTTPS', 5000, 'HTTP')> will do SSL offloading on the ELB, forwarding to port 
 5000 HTTP on the backends
 
 =head2 TCPELBListener($lbport[, $instance_port])
