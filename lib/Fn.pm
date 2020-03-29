@@ -90,5 +90,10 @@ package Fn;
     }
   }
 
+  sub And {
+    my @conditions = @_;
+    return { 'Fn::And' => [ @conditions ] };
+  }
+
 1;
 

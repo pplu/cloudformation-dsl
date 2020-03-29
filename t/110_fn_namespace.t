@@ -28,4 +28,10 @@ is_deeply(
   { 'Fn::Cidr' => [ '1.1.1.1', 2 ] }
 );
 
+is_deeply(
+  Fn::And( 'val1' , 'val2' ),
+  { 'Fn::And' => [ 'val1', 'val2' ] },
+  'And used as Function'
+);
+
 done_testing;
