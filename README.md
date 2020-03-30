@@ -328,8 +328,8 @@ is a shorthand way of writing an ELB Listener. It can be used in many ways:
 `ELBListener(80, 'HTTP', 3000)` will forward traffic from port 80 of the ELB to port 3000 on the 
 backends
 
-`ELBListener(443, 'HTTPS', 5000, 'HTTP') will do SSL offloading on the ELB, forwarding to port 
-5000 HTTP on the backends`
+`ELBListener(443, 'HTTPS', 5000, 'HTTP')` will do SSL offloading on the ELB, forwarding to port 
+5000 HTTP on the backends
 
 ## TCPELBListener($lbport\[, $instance\_port\])
 
@@ -426,11 +426,3 @@ Please report bugs to: [https://github.com/pplu/cfn-perl/cloudformation-dsl](htt
 Copyright (c) 2013 by CAPSiDE
 This code is distributed under the Apache 2 License. The full text of the 
 license can be found in the LICENSE file included with this module.
-
-# POD ERRORS
-
-Hey! **The above document had some coding errors, which are explained below:**
-
-- Around line 990:
-
-    Unterminated C<...> sequence
