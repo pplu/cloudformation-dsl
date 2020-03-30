@@ -95,5 +95,11 @@ package Fn;
     return { 'Fn::And' => [ @conditions ] };
   }
 
+  sub GetAtt {
+    my ($ref, $property) = @_;
+    die "Fn::GetAtt expected a logical name and a property name" if (not defined $ref or not defined $property);
+    { 'Fn::GetAtt' => [ $ref, $property ] }
+  }
+
 1;
 
