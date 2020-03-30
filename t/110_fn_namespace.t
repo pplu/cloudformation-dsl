@@ -34,4 +34,16 @@ is_deeply(
   'And used as Function'
 );
 
+is_deeply(
+  Fn::GetAtt( 'ref' , 'property' ),
+  { 'Fn::GetAtt' => [ 'ref', 'property' ] },
+  'GetAtt used as Function'
+);
+
+is_deeply(
+  GetAtt( 'ref' , 'property' ),
+  Fn::GetAtt( 'ref' , 'property' ),
+  'GetAtt should return the same result as Fn::GetAtt'
+);
+
 done_testing;
