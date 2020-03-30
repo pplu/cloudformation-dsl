@@ -1,11 +1,11 @@
 use Test::More;
 use AWS;
 
-foreach my $thing ( keys %AWS:: ) {
+my @pseudoparams = qw/AccountId Partition NotificationARNs StackName StackId Region URLSuffix NoValue/;
+
+foreach my $thing ( @pseudoparams ) {
   my $sub = *{ "AWS::$thing" };
-  if ( defined &$sub ) {    
-    is_deeply ( &$sub , { 'Ref' => "AWS::$thing" }, "AWS::$thing" );
-  }
+  is_deeply ( &$sub , { 'Ref' => "AWS::$thing" }, "AWS::$thing" );
 }
 
 
