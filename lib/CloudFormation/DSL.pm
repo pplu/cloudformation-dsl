@@ -442,9 +442,7 @@ package CloudFormation::DSL {
   }
 
   sub GetAtt {
-    my ($ref, $property) = @_;
-    die "GetAtt expected a logical name and a property name" if (not defined $ref or not defined $property);
-    { 'Fn::GetAtt' => [ $ref, $property ] }
+    return Fn::GetAtt(@_);
   }
 
   sub ELBListener {

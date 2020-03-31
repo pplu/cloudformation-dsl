@@ -20,4 +20,10 @@ package AWS;
   sub StackName {
     return { Ref => 'AWS::StackName' };
   }
+  sub Partition {
+    return { Ref => 'AWS::Partition' };
+  }
+  sub URLSuffix {
+    return { Ref => 'AWS::URLSuffix' };
+  }
 1;

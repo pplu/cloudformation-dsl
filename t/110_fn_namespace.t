@@ -28,4 +28,22 @@ is_deeply(
   { 'Fn::Cidr' => [ '1.1.1.1', 2 ] }
 );
 
+is_deeply(
+  Fn::And( 'val1' , 'val2' ),
+  { 'Fn::And' => [ 'val1', 'val2' ] },
+  'And used as Function'
+);
+
+is_deeply(
+  Fn::GetAtt( 'ref' , 'property' ),
+  { 'Fn::GetAtt' => [ 'ref', 'property' ] },
+  'GetAtt used as Function'
+);
+
+is_deeply(
+  GetAtt( 'ref' , 'property' ),
+  Fn::GetAtt( 'ref' , 'property' ),
+  'GetAtt should return the same result as Fn::GetAtt'
+);
+
 done_testing;
