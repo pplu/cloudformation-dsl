@@ -4,6 +4,7 @@ package CloudFormation::DSL {
   use Moose ();
   use Moose::Exporter;
   use Moose::Util::MetaRole ();
+  use namespace::autoclean ();
   use true ();
 
   our $VERSION = '0.01';
@@ -32,6 +33,9 @@ package CloudFormation::DSL {
                   Tag ELBListener TCPELBListener SGRule SGEgressRule 
                   GetASGStatus GetInstanceStatus FindUbuntuImage FindBaseImage SpecifyInSubClass/ ],
       also  => 'Moose',
+    );
+    namespace::autoclean->import(
+      -cleanee => scalar(caller),
     );
     true->import();
 
